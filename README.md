@@ -56,6 +56,8 @@ Build a reproducible analytics product that helps policymakers answer:
 │   ├── cleaning/
 │   ├── forecasting/
 │   └── utils/
+├── .env.example                 # Environment variable template
+├── requirements.txt             # Runtime dependencies
 └── requirements-dev.txt
 ```
 
@@ -64,6 +66,7 @@ Build a reproducible analytics product that helps policymakers answer:
 - `docs/project_brief.md`
 - `docs/scope.md`
 - `docs/methodology.md`
+- `docs/environment_setup.md`
 
 ## Technical Principles
 
@@ -76,15 +79,19 @@ Build a reproducible analytics product that helps policymakers answer:
 ## Quick Start (Codespaces or Local)
 
 1. Open this repository in GitHub Codespaces.
-2. Let post-create setup install dependencies from `requirements-dev.txt`.
-3. Place source CSV files in `data/raw/`.
-4. Build ingestion and transformation layers in `src/` and `dbt/`.
-5. Serve dashboard prototypes from `reports/dashboards/`.
+2. Let post-create setup run from `.devcontainer/post-create.sh`.
+3. Copy environment template: `cp .env.example .env`.
+4. Place source CSV files in `data/raw/`.
+5. Build ingestion and transformation layers in `src/` and `dbt/`.
+6. Serve dashboard prototypes from `reports/dashboards/`.
+
+For detailed setup and troubleshooting, see `docs/environment_setup.md`.
 
 ## Current Implementation Status
 
 - Phase 0 complete: project framing, KPI framework, methodology baseline.
 - Phase 1 complete: repository scaffold, folder conventions, Codespaces setup.
+- Phase 2 complete: reproducible environment provisioning and dependency manifests.
 
 ## License
 
