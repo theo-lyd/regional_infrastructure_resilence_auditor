@@ -58,6 +58,7 @@ Build a reproducible analytics product that helps policymakers answer:
 │   └── utils/
 ├── .env.example                 # Environment variable template
 ├── requirements.txt             # Runtime dependencies
+├── requirements-airflow.txt     # Airflow-only dependencies
 └── requirements-dev.txt
 ```
 
@@ -67,6 +68,7 @@ Build a reproducible analytics product that helps policymakers answer:
 - `docs/scope.md`
 - `docs/methodology.md`
 - `docs/environment_setup.md`
+- `docs/metabase_setup.md`
 
 ## Documentation Hub (Defense and Watchalong)
 

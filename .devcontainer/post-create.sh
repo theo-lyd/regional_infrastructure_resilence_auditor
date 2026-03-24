@@ -16,12 +16,10 @@ echo "[Phase 2] Installing core and developer dependencies"
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt -r requirements-dev.txt
 
-if [[ "${AIRFLOW_ISOLATED:-0}" == "1" ]]; then
-  echo "[Phase 2] Creating isolated Airflow environment (.venv-airflow)"
-  python3 -m venv .venv-airflow
-  . .venv-airflow/bin/activate
-  python -m pip install --upgrade pip
-  python -m pip install "apache-airflow>=2.10.0,<3.0"
-fi
+echo "[Phase 2] Creating isolated Airflow environment (.airflow_venv)"
+python3 -m venv .airflow_venv
+. .airflow_venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-airflow.txt
 
 echo "[Phase 2] Bootstrap completed"

@@ -10,6 +10,7 @@ For public-sector analytics, reproducibility is mandatory for trust and audit.
 - `.devcontainer/devcontainer.json` for Codespaces/devcontainer standardization
 - `.devcontainer/post-create.sh` bootstrap script
 - `requirements.txt` runtime dependency manifest
+- `requirements-airflow.txt` Airflow-only dependency manifest
 - `requirements-dev.txt` development dependency manifest
 - `.env.example` environment variable template
 - `environment_setup.md` operational setup instructions
@@ -17,9 +18,9 @@ For public-sector analytics, reproducibility is mandatory for trust and audit.
 ## How It Was Implemented
 
 1. Configure devcontainer to run a script-based bootstrap.
-2. Bootstrap script creates `.venv`, upgrades pip tooling, installs dependencies.
-3. Add optional Airflow isolation (`.venv-airflow`) using `AIRFLOW_ISOLATED=1`.
-4. Separate runtime and developer-only dependencies.
+2. Bootstrap script creates `.venv` for dbt/DuckDB/analytics dependencies.
+3. Bootstrap script creates `.airflow_venv` for Airflow-only dependencies.
+4. Separate runtime, Airflow, and developer-only dependency manifests.
 5. Provide novice-friendly setup and validation commands.
 
 ## Why It Matters
@@ -40,7 +41,7 @@ For public-sector analytics, reproducibility is mandatory for trust and audit.
 
 - limited CPU/RAM: avoid unnecessary heavyweight startup tasks
 - limited storage: keep raw extracts curated and avoid giant temporary files
-- startup latency: move expensive optional setup behind toggles
+- startup latency: isolate heavy Airflow installation in dedicated environment
 - ephemeral environments: keep setup scripted and idempotent
 
 ## Evidence Checklist (Defense Ready)
@@ -48,7 +49,7 @@ For public-sector analytics, reproducibility is mandatory for trust and audit.
 - Can a fresh Codespace install all dependencies automatically?
 - Can a local user reproduce setup using documented commands?
 - Are environment assumptions explicit in version control?
-- Is optional Airflow isolation documented for conflict handling?
+- Is dedicated Airflow isolation documented and applied consistently?
 
 ## Exit Criteria for Phase Completion
 

@@ -8,6 +8,7 @@ This folder is the project control center for technical and non-technical stakeh
 - `scope.md`: in-scope and out-of-scope boundaries.
 - `methodology.md`: KPI design, model layers, and technical principles.
 - `environment_setup.md`: reproducible environment instructions for Codespaces/local.
+- `metabase_setup.md`: Metabase JAR + DuckDB plugin setup (non-Docker).
 
 ## Phase-by-Phase Guides
 

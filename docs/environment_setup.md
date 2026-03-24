@@ -20,6 +20,7 @@ This setup ensures:
 - `.devcontainer/devcontainer.json`
 - `.devcontainer/post-create.sh`
 - `requirements.txt`
+- `requirements-airflow.txt`
 - `requirements-dev.txt`
 - `.env.example`
 
@@ -36,15 +37,20 @@ This setup ensures:
 3. Wait for container startup.
 4. The post-create script runs automatically:
    - upgrades pip tooling
-   - creates `.venv`
-   - installs `requirements.txt` and `requirements-dev.txt`
+   - creates `.venv` (dbt/DuckDB/analytics)
+   - creates `.airflow_venv` (Airflow only)
+   - installs dependencies from dedicated manifests
 
 Validation checks in terminal:
 
 ```bash
 source .venv/bin/activate
 python --version
-pip list | grep -E "duckdb|pandas|dbt-duckdb|airflow|streamlit"
+pip list | grep -E "duckdb|pandas|dbt-duckdb|streamlit"
+
+source .airflow_venv/bin/activate
+python --version
+pip list | grep -E "apache-airflow"
 ```
 
 ## Option B: local setup
@@ -56,36 +62,21 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt -r requirements-dev.txt
+
+python3 -m venv .airflow_venv
+source .airflow_venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements-airflow.txt
+
 cp .env.example .env
 ```
 
-## Optional: isolate Airflow (recommended if package conflicts appear)
+## Environment usage convention
 
-Airflow can have stricter dependency constraints than analytics libraries.
-If you encounter dependency clashes, isolate Airflow into `.venv-airflow`.
+- Use `.venv` for ingestion, cleaning, dbt, forecasting, and dashboard development.
+- Use `.airflow_venv` only for Airflow scheduler/webserver/DAG tooling.
 
-### In Codespaces
-
-Set in `.env`:
-
-```bash
-AIRFLOW_ISOLATED=1
-```
-
-Re-run bootstrap:
-
-```bash
-bash .devcontainer/post-create.sh
-```
-
-### Manual local isolation
-
-```bash
-python3 -m venv .venv-airflow
-source .venv-airflow/bin/activate
-pip install --upgrade pip
-pip install "apache-airflow>=2.10.0,<3.0"
-```
+This separation prevents package conflicts and improves reproducibility.
 
 ## Environment variables
 
@@ -99,21 +90,21 @@ cp .env.example .env
 - `DUCKDB_PATH`: location of analytical DuckDB file
 - `DBT_PROFILES_DIR`: dbt profile directory
 - `AIRFLOW_HOME`: base Airflow metadata/log path
-- `AIRFLOW_ISOLATED`: toggle for separate Airflow venv during bootstrap
 
 ## Codespaces constraints and practical notes
 
 - Codespaces has finite CPU/RAM and storage; avoid large temporary artifacts in repository root.
 - Keep raw source data in `data/raw/` and avoid committing personal/local test dumps.
-- Heavy Airflow installs can slow first boot; use isolated mode only when needed.
+- Airflow installs are isolated in `.airflow_venv` to avoid dependency drift with analytics tooling.
 - Pin dependency ranges in manifests to reduce "works on my machine" issues.
 
 ## Industry-standard practices applied
 
 - environment provisioning scripted in version control
 - runtime and dev dependencies separated
+- airflow dependencies separated from analytics dependencies
 - env vars templated with `.env.example`
-- optional component isolation for orchestrator conflicts
+- deterministic component isolation for orchestrator conflicts
 - reproducible onboarding instructions for future contributors
 
 ## Public-sector stakeholder defense notes (Berlin presentation)
@@ -122,4 +113,4 @@ When defending this phase, emphasize:
 - reproducibility: any reviewer can recreate the same toolchain
 - auditability: setup assumptions are explicit and documented
 - maintainability: environment bootstrap is automated and versioned
-- risk control: Airflow can be isolated without blocking analytics development
+- risk control: Airflow is always isolated to protect analytics environment stability
