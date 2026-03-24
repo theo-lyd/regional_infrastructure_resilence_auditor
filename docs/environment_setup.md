@@ -20,8 +20,6 @@ This setup ensures:
 - `.devcontainer/devcontainer.json`
 - `.devcontainer/post-create.sh`
 - `requirements.txt`
-- `requirements-airflow.txt`
-- `requirements-dev.txt`
 - `.env.example`
 
 ## Prerequisites
@@ -38,8 +36,8 @@ This setup ensures:
 4. The post-create script runs automatically:
    - upgrades pip tooling
    - creates `.venv` (dbt/DuckDB/analytics)
-   - creates `.airflow_venv` (Airflow only)
-   - installs dependencies from dedicated manifests
+   - creates `.airflow-venv` (Airflow only)
+   - installs dependencies from `requirements.txt`
 
 Validation checks in terminal:
 
@@ -48,7 +46,7 @@ source .venv/bin/activate
 python --version
 pip list | grep -E "duckdb|pandas|dbt-duckdb|streamlit"
 
-source .airflow_venv/bin/activate
+source .airflow-venv/bin/activate
 python --version
 pip list | grep -E "apache-airflow"
 ```
@@ -61,12 +59,12 @@ Run from repository root:
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip setuptools wheel
-pip install -r requirements.txt -r requirements-dev.txt
+pip install -r requirements.txt
 
-python3 -m venv .airflow_venv
-source .airflow_venv/bin/activate
+python3 -m venv .airflow-venv
+source .airflow-venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements-airflow.txt
+pip install "apache-airflow>=2.10.0,<3.0"
 
 cp .env.example .env
 ```
@@ -74,7 +72,7 @@ cp .env.example .env
 ## Environment usage convention
 
 - Use `.venv` for ingestion, cleaning, dbt, forecasting, and dashboard development.
-- Use `.airflow_venv` only for Airflow scheduler/webserver/DAG tooling.
+- Use `.airflow-venv` only for Airflow scheduler/webserver/DAG tooling.
 
 This separation prevents package conflicts and improves reproducibility.
 
@@ -95,14 +93,14 @@ cp .env.example .env
 
 - Codespaces has finite CPU/RAM and storage; avoid large temporary artifacts in repository root.
 - Keep raw source data in `data/raw/` and avoid committing personal/local test dumps.
-- Airflow installs are isolated in `.airflow_venv` to avoid dependency drift with analytics tooling.
+- Airflow installs are isolated in `.airflow-venv` to avoid dependency drift with analytics tooling.
 - Pin dependency ranges in manifests to reduce "works on my machine" issues.
 
 ## Industry-standard practices applied
 
 - environment provisioning scripted in version control
-- runtime and dev dependencies separated
-- airflow dependencies separated from analytics dependencies
+- single dependency manifest for onboarding simplicity
+- airflow runtime isolated by dedicated virtual environment
 - env vars templated with `.env.example`
 - deterministic component isolation for orchestrator conflicts
 - reproducible onboarding instructions for future contributors

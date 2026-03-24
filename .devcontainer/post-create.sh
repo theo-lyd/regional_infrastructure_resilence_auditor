@@ -14,12 +14,25 @@ python3 -m venv .venv
 echo "[Phase 2] Installing core and developer dependencies"
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt -r requirements-dev.txt
+python -m pip install -r requirements.txt
 
-echo "[Phase 2] Creating isolated Airflow environment (.airflow_venv)"
-python3 -m venv .airflow_venv
-. .airflow_venv/bin/activate
+echo "[Phase 2] Creating isolated Airflow environment (.airflow-venv)"
+python3 -m venv .airflow-venv
+. .airflow-venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -r requirements-airflow.txt
+python -m pip install "apache-airflow>=2.10.0,<3.0"
+
+echo "[Phase 2] Creating Airflow project structure"
+mkdir -p airflow/dags airflow/logs airflow/plugins
+
+echo "[Phase 2] Persisting Airflow environment variables"
+if ! grep -q "AIRFLOW_HOME=.*\/airflow" ~/.bashrc; then
+	cat <<'EOF' >> ~/.bashrc
+
+# Airflow project-scoped config
+export AIRFLOW_HOME=$(pwd)/airflow
+export AIRFLOW__CORE__LOAD_EXAMPLES=False
+EOF
+fi
 
 echo "[Phase 2] Bootstrap completed"

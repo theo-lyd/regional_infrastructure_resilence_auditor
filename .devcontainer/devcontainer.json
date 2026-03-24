@@ -16,6 +16,17 @@
       ]
     }
   },
+  "forwardPorts": [8080, 3000],
+  "portsAttributes": {
+    "8080": {
+      "label": "Airflow",
+      "visibility": "private"
+    },
+    "3000": {
+      "label": "Metabase",
+      "visibility": "private"
+    }
+  },
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "remoteUser": "vscode"
 }

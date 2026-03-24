@@ -9,9 +9,7 @@ For public-sector analytics, reproducibility is mandatory for trust and audit.
 
 - `.devcontainer/devcontainer.json` for Codespaces/devcontainer standardization
 - `.devcontainer/post-create.sh` bootstrap script
-- `requirements.txt` runtime dependency manifest
-- `requirements-airflow.txt` Airflow-only dependency manifest
-- `requirements-dev.txt` development dependency manifest
+- `requirements.txt` single dependency manifest
 - `.env.example` environment variable template
 - `environment_setup.md` operational setup instructions
 
@@ -19,8 +17,8 @@ For public-sector analytics, reproducibility is mandatory for trust and audit.
 
 1. Configure devcontainer to run a script-based bootstrap.
 2. Bootstrap script creates `.venv` for dbt/DuckDB/analytics dependencies.
-3. Bootstrap script creates `.airflow_venv` for Airflow-only dependencies.
-4. Separate runtime, Airflow, and developer-only dependency manifests.
+3. Bootstrap script creates `.airflow-venv` for Airflow-only dependencies.
+4. Use a single `requirements.txt` for dependency management simplicity.
 5. Provide novice-friendly setup and validation commands.
 
 ## Why It Matters

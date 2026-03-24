@@ -57,9 +57,7 @@ Build a reproducible analytics product that helps policymakers answer:
 │   ├── forecasting/
 │   └── utils/
 ├── .env.example                 # Environment variable template
-├── requirements.txt             # Runtime dependencies
-├── requirements-airflow.txt     # Airflow-only dependencies
-└── requirements-dev.txt
+└── requirements.txt             # Single dependency manifest
 ```
 
 ## Governance Documents
