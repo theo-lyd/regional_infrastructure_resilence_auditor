@@ -68,6 +68,16 @@ Build a reproducible analytics product that helps policymakers answer:
 - `docs/methodology.md`
 - `docs/environment_setup.md`
 
+## Documentation Hub (Defense and Watchalong)
+
+Use `docs/docs_index.md` as the primary navigation file.
+
+Key companion docs include:
+- phase deep-dives (`docs/phase_0_governance.md`, `docs/phase_1_repository_setup.md`, `docs/phase_2_environment_configuration.md`)
+- modeling governance (`docs/grain_definition.md`, `docs/join_strategy.md`, `docs/formula_to_model_mapping.md`)
+- source and rules (`docs/source_inventory.md`, `docs/standardization_business_rules.md`)
+- stakeholder delivery (`docs/dashboard_question_bank.md`, `docs/thesis_report_outline.md`, `docs/final_handoff.md`)
+
 ## Technical Principles
 
 1. Raw data stays raw.
@@ -92,6 +102,10 @@ For detailed setup and troubleshooting, see `docs/environment_setup.md`.
 - Phase 0 complete: project framing, KPI framework, methodology baseline.
 - Phase 1 complete: repository scaffold, folder conventions, Codespaces setup.
 - Phase 2 complete: reproducible environment provisioning and dependency manifests.
+
+## Public-Sector Presentation Note
+
+This project is intentionally documented for non-technical and technical audiences, including stakeholder review and defense use cases in Berlin.
 
 ## License
 
