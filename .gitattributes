@@ -1,0 +1,12 @@
+# Treat CSV files as text and use CSV-aware diff
+*.csv diff=csv
+
+# Treat JSON as text for line-by-line diff
+*.json diff=json
+
+# Treat YAML as text for line-by-line diff
+*.yml diff=yaml
+*.yaml diff=yaml
+
+# Mark source data as immutable for reference
+data/raw/*.csv merge=union

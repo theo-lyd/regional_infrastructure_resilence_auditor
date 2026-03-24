@@ -205,3 +205,32 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project-specific: Isolated Airflow environment
+.airflow-venv/
+
+# Project-specific: Generated outputs (processed data, DuckDB files)
+data/processed/*.duckdb
+data/processed/*.parquet
+data/processed/*.sqlite
+data/processed/*.db
+
+# Project-specific: Airflow runtime artifacts
+airflow/logs/
+airflow/dags/__pycache__/
+airflow/plugins/__pycache__/
+
+# Project-specific: Metabase artifacts
+metabase.jar
+plugins/
+
+# Project-specific: Environment variable file (but not template)
+.env
+!.env.example
+
+# Project-specific: IDE and editor artifacts
+.DS_Store
+Thumbsdb
+*.swp
+*.swo
+*~
