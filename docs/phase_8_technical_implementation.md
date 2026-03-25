@@ -2,7 +2,7 @@
 
 ## Scope of This Technical Record
 
-This document captures implementation details for Phase 8 (dashboard batch D1 and data quality status):
+This document captures implementation details for Phase 8 (dashboard batch D1, data quality status, and predictive modeling):
 - what was implemented
 - how it was implemented
 - commands/scripts/files used
@@ -21,6 +21,12 @@ This document captures implementation details for Phase 8 (dashboard batch D1 an
 3. Documentation/navigation updates:
 - docs/docs_index.md
 - README.md (implementation status)
+
+4. Predictive modeling implementation:
+- src/forecasting/phase8_capacity_growth_forecast.py
+- docs/predictive_assumptions.md
+- output tables: `analytics_predictions.pred_capacity_growth_forecast`, `analytics_predictions.pred_capacity_growth_evaluation`, `analytics_predictions.pred_capacity_growth_coefficients`
+- output file: `data/processed/pred_capacity_growth_forecast.csv`
 
 ## How It Was Implemented
 
@@ -44,6 +50,30 @@ Implemented the first dashboard batch with direct mart consumption:
 
 The app uses read-only DuckDB access and cache wrappers to keep interactions responsive while preventing accidental writes.
 
+### Predictive Modeling (User-defined Phase 8)
+
+Implemented the requested predictive modeling batches as follows.
+
+1. Feature engineering:
+- prior-year growth from `analytics_intermediate.int_regional_sector_yoy`
+- 3-year moving averages per region and sector
+- service concentration from `analytics_intermediate.int_regional_sector_metrics`
+- regional deficit trend from year-over-year changes in `analytics_marts.mart_coverage_gap_index`
+
+2. Prediction target:
+- selected target: `capacity growth forecast`
+- target variable: next-year capacity growth ratio
+
+3. Model choice:
+- interpretable linear regression (`scikit-learn`) when supervised next-year labels are available
+- score-based extrapolation fallback when history is too short for supervised training
+- coefficients/weights persisted for transparent interpretation
+
+4. Model evaluation:
+- trend fit (`R^2`, MAE)
+- directional accuracy (sign match)
+- interpretability summary and business usefulness summary stored in evaluation output
+
 ## Commands/Codes and Files Ran
 
 Commands executed in this phase:
@@ -59,6 +89,11 @@ cd /workspaces/regional_infrastructure_resilence_auditor && ./.venv/bin/python -
 cd /workspaces/regional_infrastructure_resilence_auditor
 source .venv/bin/activate
 streamlit run reports/dashboards/executive_overview_app.py
+
+# run Phase 8 predictive forecasting
+cd /workspaces/regional_infrastructure_resilence_auditor
+source .venv/bin/activate
+python src/forecasting/phase8_capacity_growth_forecast.py
 ```
 
 ## Validation Outcomes
@@ -72,8 +107,13 @@ Result from executed dbt build:
 Python compile check:
 1. `reports/dashboards/executive_overview_app.py` compiled without syntax errors.
 
+Forecasting run check:
+1. prediction tables generated in `analytics_predictions` schema.
+2. CSV output generated at `data/processed/pred_capacity_growth_forecast.csv`.
+
 ## Output State After Completion
 
 - Batch D1 executive dashboard is now implemented and runnable.
 - Data quality status is exposed as a governed mart for stakeholder visibility.
+- Predictive modeling layer is now implemented with transparent feature engineering, interpretable model output, and documented assumptions.
 - Dashboard delivery now has a concrete code baseline for subsequent batches (D2-D7).

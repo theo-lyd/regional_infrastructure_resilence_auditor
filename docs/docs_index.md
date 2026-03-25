@@ -43,6 +43,7 @@ Each phase guide contains:
 - `formula_to_model_mapping.md`: KPI formulas mapped to dbt marts/facts.
 - `dbt_scaffold.md`: dbt project architecture and model contracts.
 - `data_dictionary.md`: canonical field glossary and business meaning.
+- `predictive_assumptions.md`: forecasting target, feature logic, evaluation assumptions, and risk band policy.
 
 ## Stakeholder Delivery
 
