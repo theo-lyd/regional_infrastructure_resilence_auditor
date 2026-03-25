@@ -1,0 +1,62 @@
+version: 2
+
+models:
+  - name: stg_clean_childcare_22541
+    columns:
+      - name: normalized_key
+        tests:
+          - not_null
+          - unique
+      - name: sector
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['childcare']
+      - name: period_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['snapshot']
+      - name: snapshot_year
+        tests:
+          - not_null
+
+  - name: stg_clean_youth_22542
+    columns:
+      - name: normalized_key
+        tests:
+          - not_null
+          - unique
+      - name: sector
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['youth_welfare']
+      - name: period_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['snapshot']
+      - name: snapshot_year
+        tests:
+          - not_null
+
+  - name: stg_clean_hospital_23111
+    columns:
+      - name: normalized_key
+        tests:
+          - not_null
+          - unique
+      - name: sector
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['hospital']
+      - name: period_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['snapshot']
+      - name: snapshot_year
+        tests:
+          - not_null
