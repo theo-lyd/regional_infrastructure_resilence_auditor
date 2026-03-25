@@ -20,3 +20,11 @@ models:
     +materialized: view
     staging:
       +schema: staging
+    intermediate:
+      +schema: intermediate
+    dimensions:
+      +schema: dimensions
+    facts:
+      +schema: facts
+    marts:
+      +schema: marts

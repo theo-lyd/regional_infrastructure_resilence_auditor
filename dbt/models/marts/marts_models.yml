@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: mart_service_maturity_index
+    description: "Cross-sector maturity indicator by region and year."
+    columns:
+      - name: region_code
+        tests:
+          - not_null
+      - name: year
+        tests:
+          - not_null
+
+  - name: mart_underserved_region_score
+    description: "Penalty-style score indicating potential underserved conditions by region-year."
+    columns:
+      - name: region_code
+        tests:
+          - not_null
+      - name: year
+        tests:
+          - not_null
+
+  - name: mart_coverage_gap_index
+    description: "Gap index versus sector benchmark coverage by region-year."
+    columns:
+      - name: region_code
+        tests:
+          - not_null
+      - name: year
+        tests:
+          - not_null
+
+  - name: mart_growth_and_concentration
+    description: "Year-over-year growth and concentration trend rollup by region-year."
+    columns:
+      - name: region_code
+        tests:
+          - not_null
+      - name: year
+        tests:
+          - not_null
+
+  - name: mart_capacity_benchmark
+    description: "Benchmark-relative capacity index by region and year."
+    columns:
+      - name: region_code
+        tests:
+          - not_null
+      - name: year
+        tests:
+          - not_null
+
+  - name: mart_resilience_score
+    description: "Composite resilience score combining maturity, underserved, gap, and growth components."
+    columns:
+      - name: region_code
+        tests:
+          - not_null
+      - name: year
+        tests:
+          - not_null
+      - name: resilience_score
+        tests:
+          - not_null

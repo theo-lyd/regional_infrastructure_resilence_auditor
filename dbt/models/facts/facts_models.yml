@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: fct_regional_sector_capacity
+    description: "Conformed regional-sector-year fact table for capacity and benchmark-ready measures."
+    columns:
+      - name: fact_row_id
+        tests:
+          - not_null
+          - unique
+      - name: region_code
+        tests:
+          - not_null
+      - name: sector_id
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['childcare', 'youth', 'hospital']
+      - name: year
+        tests:
+          - not_null

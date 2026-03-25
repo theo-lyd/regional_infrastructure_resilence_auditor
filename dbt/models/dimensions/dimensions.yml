@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: dim_region
+    columns:
+      - name: region_id
+        tests:
+          - not_null
+          - unique
+      - name: region_code
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_time
+    columns:
+      - name: year_key
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_sector
+    columns:
+      - name: sector_key
+        tests:
+          - not_null
+          - unique
+          - accepted_values:
+              arguments:
+                values: ['childcare', 'youth_welfare', 'hospital']
