@@ -58,6 +58,8 @@ Each phase guide contains:
 - `final_presentation_deck.md`: final presentation deck draft (slide-by-slide).
 - `architecture_diagrams.md`: architecture, KPI composition, lineage, and orchestration diagrams.
 - `defense_qa_and_lessons.md`: stakeholder Q&A, interview prompts, and lessons learned.
+- `interview_question_bank_with_answers.md`: business, theoretical, and technical interview questions with suggested answers.
+- `git_commands_reference.md`: detailed explanation of Git commands used across project phases.
 
 ## Reading Order (Novice Friendly)
 
