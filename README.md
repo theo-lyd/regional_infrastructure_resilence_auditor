@@ -102,6 +102,12 @@ For detailed setup and troubleshooting, see `docs/environment_setup.md`.
 - Phase 0 complete: project framing, KPI framework, methodology baseline.
 - Phase 1 complete: repository scaffold, folder conventions, Codespaces setup.
 - Phase 2 complete: reproducible environment provisioning and dependency manifests.
+- Phase 3 complete: source inventory and field-level audit documentation.
+- Phase 4 complete: reproducible raw ingestion and validation pipeline in DuckDB.
+- Phase 5 complete: dbt initialization, sources, staging models, and baseline tests.
+- Phase 6 complete: standardization macros, cleaned staging, and documented business rules.
+- Phase 7 complete: dimensions, intermediate metrics, facts, and KPI marts.
+- Phase 8 complete: executive overview dashboard batch (D1) and data quality status mart.
 
 ## Public-Sector Presentation Note
 

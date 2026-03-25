@@ -63,3 +63,20 @@ models:
       - name: resilience_score
         tests:
           - not_null
+
+  - name: mart_data_quality_status
+    description: "Annual data quality status derived from completeness signals on conformed facts."
+    columns:
+      - name: year
+        tests:
+          - not_null
+          - unique
+      - name: total_rows
+        tests:
+          - not_null
+      - name: data_quality_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['good', 'watch', 'critical', 'insufficient']
