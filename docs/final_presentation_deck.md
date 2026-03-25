@@ -67,7 +67,7 @@
 - forecasts are directional, not deterministic
 - no end-user ad-hoc query/metric builder in current UI
 - no end-user what-if scenario form in current UI
-- dbt snapshot-based SCD Type 2 not yet active
+- dbt snapshot-based SCD Type 2 active for selected dimensions, with broader rollout pending
 
 ## Slide 14 — Lessons Learned
 - interpretability drives adoption

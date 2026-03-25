@@ -1,0 +1,31 @@
+{
+  "sources": [
+    {
+      "file_name": "22541-01-01-4.csv",
+      "format": "csv",
+      "encoding": "iso-8859-1",
+      "delimiter": ";",
+      "expected_min_columns": 14,
+      "expected_max_columns": 16,
+      "fail_on_schema_drift": true
+    },
+    {
+      "file_name": "22542-01-02-4.csv",
+      "format": "csv",
+      "encoding": "iso-8859-1",
+      "delimiter": ";",
+      "expected_min_columns": 10,
+      "expected_max_columns": 12,
+      "fail_on_schema_drift": true
+    },
+    {
+      "file_name": "23111-01-04-4.csv",
+      "format": "csv",
+      "encoding": "iso-8859-1",
+      "delimiter": ";",
+      "expected_min_columns": 20,
+      "expected_max_columns": 22,
+      "fail_on_schema_drift": true
+    }
+  ]
+}

@@ -81,6 +81,25 @@ models:
               arguments:
                 values: ['good', 'watch', 'critical', 'insufficient']
 
+  - name: mart_data_quality_scorecard_domain
+    description: "Annual domain-level quality scorecard for childcare, youth, and hospital sectors."
+    columns:
+      - name: year
+        tests:
+          - not_null
+      - name: sector_id
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['childcare', 'youth', 'hospital']
+      - name: domain_quality_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['good', 'watch', 'critical', 'insufficient']
+
   - name: mart_kpi_summary_executive
     description: "Annual executive KPI summary view used by the stakeholder overview dashboard."
     columns:

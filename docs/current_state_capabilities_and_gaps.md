@@ -5,18 +5,20 @@ This document is the authoritative "implemented vs not implemented" checkpoint f
 ## 1. Current State Snapshot
 
 Implemented and operational:
-1. raw ingestion to DuckDB for configured source files
+1. config-driven raw ingestion to DuckDB via source registry
 2. layered dbt transformations (staging, intermediate, dimensions, facts, marts)
 3. forecasting outputs with interpretable model and fallback mode
 4. Streamlit stakeholder dashboard (multi-tab, filtered views)
 5. Airflow orchestration and CI checks
 6. SLA monitoring and alert routing guidance
+7. initial dbt snapshot-based SCD Type 2 for core dimensions
+8. domain-level data quality scorecard mart and dashboard visibility
+9. docs sync CI guardrail and release governance baseline
 
 Not implemented yet:
 1. full ad-hoc query builder in the dashboard UI
 2. user-defined metric builder in the dashboard UI
 3. end-user what-if simulation form in the dashboard UI
-4. active dbt snapshot-based SCD Type 2 models
 
 ## 2. Dashboard and Modeling UX Boundaries
 
@@ -34,11 +36,12 @@ Current UX boundaries:
 
 What exists now:
 1. dbt project is configured with snapshot paths
-2. model design uses historical yearly snapshots in source fields
+2. active dbt snapshot models for `dim_region` and `dim_sector`
+3. model design uses historical yearly snapshots in source fields
 
-What is missing for practical SCD Type 2:
-1. no dbt snapshot definitions are currently implemented
-2. no active SCD Type 2 columns (for example valid_from, valid_to, is_current) managed by dbt snapshots
+Current SCD Type 2 rollout boundary:
+1. Type 2 tracking is currently implemented for selected dimensions only
+2. additional dimensions still require snapshot expansion and policy decisions
 
 Clarification on SCD Type 1:
 1. SCD Type 1 is not explicitly modeled as a dedicated pattern either.
@@ -49,8 +52,9 @@ Clarification on SCD Type 1:
 Implemented checks:
 1. data freshness
 2. minimum completeness
-3. failed refresh output presence
-4. row-count anomaly
+3. completeness regression
+4. failed refresh output presence
+5. row-count anomaly
 
 Frequency:
 1. daily through Airflow DAG schedule
@@ -64,7 +68,8 @@ Severity model (lightweight):
 1. `failed_refresh_alerts`: critical
 2. `data_freshness`: high
 3. `minimum_completeness`: high
-4. `row_count_anomaly`: medium
+4. `completeness_regression`: medium
+5. `row_count_anomaly`: medium
 
 Dedupe and escalation:
 1. notify on new incidents (PASS to FAIL transition)
@@ -82,9 +87,9 @@ Already robust:
 5. quality marts and SLA checks expose completeness and anomalies
 
 Current limitations:
-1. ingestion file list is currently explicit/hardcoded for known source files
-2. ingestion path currently assumes CSV input and configured delimiter/encoding
-3. onboarding new domains/formats requires source + staging model extension
+1. onboarding new domains/formats still requires source + staging model extension
+2. schema contracts currently enforce column-count ranges, not full semantic typing
+3. XLSX support is adapter-level and still depends on upstream sheet quality assumptions
 
 ## 6. Handling New and Different Dataset Formats
 
@@ -93,8 +98,8 @@ CSV:
 2. additional CSV datasets require ingestion + dbt source/model extension
 
 XLSX:
-1. not currently implemented in the ingestion script
-2. requires explicit reader path and schema contract definition before production use
+1. implemented in ingestion adapter through source registry format setting
+2. requires explicit sheet/contract configuration before production use
 
 Messy or poor data:
 1. system is resilient to many common missing/format issues during transformation
@@ -115,7 +120,7 @@ End-user what-if form complexity: medium-high
 
 ## 8. Recommendation Sequence
 
-1. strengthen ingestion extensibility (config-driven source registry)
-2. implement formal SCD Type 2 snapshots for selected dimensions
-3. expand alerting channels (email/Teams/webhook) using the new severity + dedupe model
-4. add controlled what-if form before full ad-hoc query builder
+1. expand SCD snapshots to additional dimensions and publish dimensional SCD policy
+2. expand alerting channels (email/Teams/webhook) using the existing severity + dedupe model
+3. add controlled what-if form before full ad-hoc query builder
+4. add semantic layer contracts before user-authored metrics

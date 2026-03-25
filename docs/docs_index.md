@@ -49,6 +49,7 @@ Each phase guide contains:
 - `predictive_assumptions.md`: forecasting target, feature logic, evaluation assumptions, and risk band policy.
 - `sla_monitoring.md`: SLA thresholds, monitoring logic, and alert interpretation.
 - `current_state_capabilities_and_gaps.md`: explicit implemented/not-implemented status, SCD position, alerting model, and data robustness boundaries.
+- `release_governance.md`: release versioning policy, checklist, approvals, and traceability requirements.
 
 ## Stakeholder Delivery
 
@@ -63,6 +64,7 @@ Each phase guide contains:
 - `git_commands_reference.md`: detailed explanation of Git commands used across project phases.
 - `shell_commands_reference.md`: command-by-command explanation for runtime, pipeline, monitoring, and launcher operations.
 - `system_launch_modes.md`: one-command and clickable launch options for technical and non-technical users.
+- `releases/`: versioned release notes for feature and governance changes.
 
 ## Reading Order (Novice Friendly)
 

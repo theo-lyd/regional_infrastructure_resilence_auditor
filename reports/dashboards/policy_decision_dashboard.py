@@ -157,6 +157,14 @@ quality = run_query(
     """
 )
 
+quality_domain = run_query(
+    """
+    select *
+    from analytics_marts.mart_data_quality_scorecard_domain
+    order by year desc, sector_id asc
+    """
+)
+
 underserved = run_query(
     """
     select region_code, region_name, year, underserved_region_score
@@ -191,6 +199,7 @@ delta_maturity = float(latest["avg_service_maturity"] - baseline["avg_service_ma
 delta_resilience = float(latest["avg_resilience_score"] - baseline["avg_resilience_score"])
 
 quality_filtered = quality[quality["year"] == latest_year].copy()
+quality_domain_filtered = quality_domain[quality_domain["year"] == latest_year].copy()
 
 underserved_filtered = underserved[underserved["year"] == latest_year].copy()
 if selected_region != "All Regions":
@@ -271,6 +280,9 @@ with tab1:
 
     st.markdown("#### Data Quality Status")
     st.dataframe(quality_filtered, use_container_width=True, hide_index=True)
+
+    st.markdown("#### Domain Data Quality Scorecard")
+    st.dataframe(quality_domain_filtered, use_container_width=True, hide_index=True)
 
 with tab2:
     st.caption("Metric guide: use places/facilities/beds and derived ratios to compare service pressure by domain at the selected year and region filter.")

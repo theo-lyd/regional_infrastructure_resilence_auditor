@@ -33,12 +33,17 @@ jobs:
       - name: Python Syntax Checks
         run: |
           python -m py_compile src/ingest_raw_duckdb.py
+          python -m py_compile src/ingestion/source_registry.py
           python -m py_compile src/validate_raw_duckdb.py
           python -m py_compile src/forecasting/phase8_capacity_growth_forecast.py
           python -m py_compile src/forecasting/generate_phase9_screenshots.py
           python -m py_compile src/monitoring/pipeline_sla_monitor.py
           python -m py_compile src/monitoring/dashboard_refresh_signal.py
           python -m py_compile airflow/dags/regional_resilience_pipeline_dag.py
+
+      - name: Documentation Sync Guardrail
+        run: |
+          python scripts/check_docs_sync.py
 
       - name: Prepare DuckDB Raw Layer
         run: |
@@ -54,7 +59,7 @@ jobs:
 
       - name: Build Dashboard Dependency Models
         run: |
-          dbt run --project-dir dbt --profiles-dir dbt --select int_regional_sector_metrics int_regional_sector_yoy mart_coverage_gap_index mart_kpi_summary_executive mart_data_quality_status
+          dbt run --project-dir dbt --profiles-dir dbt --select int_regional_sector_metrics int_regional_sector_yoy mart_coverage_gap_index mart_kpi_summary_executive mart_data_quality_status mart_data_quality_scorecard_domain
 
       - name: Run Predictive Smoke
         run: |
@@ -69,6 +74,7 @@ jobs:
           required_tables = [
               "analytics_marts.mart_kpi_summary_executive",
               "analytics_marts.mart_data_quality_status",
+              "analytics_marts.mart_data_quality_scorecard_domain",
               "analytics_predictions.pred_capacity_growth_forecast",
               "analytics_predictions.pred_capacity_growth_evaluation",
           ]

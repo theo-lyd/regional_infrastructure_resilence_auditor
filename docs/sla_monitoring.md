@@ -6,7 +6,7 @@ Define measurable service-level checks so the pipeline behaves like a production
 
 ## SLA Checks Implemented
 
-The script `src/monitoring/pipeline_sla_monitor.py` executes four checks.
+The script `src/monitoring/pipeline_sla_monitor.py` executes five checks.
 
 1. Data freshness
 - Measure: age of latest `generated_at_utc` in `analytics_predictions.pred_capacity_growth_forecast`
@@ -26,6 +26,10 @@ The script `src/monitoring/pipeline_sla_monitor.py` executes four checks.
 4. Row-count anomalies
 - Measure: absolute year-over-year row-count delta ratio for `analytics_facts.fct_regional_sector_capacity`
 - Threshold: `SLA_MAX_ROWCOUNT_DELTA_RATIO` (default `0.25`)
+
+5. Completeness regression
+- Measure: year-over-year drop in `capacity_completeness_rate` from `analytics_marts.mart_data_quality_status`
+- Threshold: `SLA_MAX_COMPLETENESS_DROP` (default `0.05`)
 
 ## Monitoring Outputs
 
@@ -49,6 +53,8 @@ Configure through `.env` values:
 SLA_MAX_PREDICTION_STALENESS_DAYS=30
 SLA_MIN_COMPLETENESS_RATE=0.85
 SLA_MAX_ROWCOUNT_DELTA_RATIO=0.25
+SLA_MAX_COMPLETENESS_DROP=0.05
+SLA_ESCALATION_EVERY_N_FAILS=2
 ```
 
 ## Alert Interpretation
@@ -62,6 +68,7 @@ SLA_MAX_ROWCOUNT_DELTA_RATIO=0.25
 - `failed_refresh_alerts`: `critical`
 - `data_freshness`: `high`
 - `minimum_completeness`: `high`
+- `completeness_regression`: `medium`
 - `row_count_anomaly`: `medium`
 
 Severity is persisted with each check result and used for triage priority in monitoring outputs.

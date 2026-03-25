@@ -21,11 +21,13 @@ MARKDOWN_REPORT_PATH = REPORTS_DIR / "pipeline_sla_report.md"
 FRESHNESS_THRESHOLD_DAYS = int(os.getenv("SLA_MAX_PREDICTION_STALENESS_DAYS", "30"))
 COMPLETENESS_MIN = float(os.getenv("SLA_MIN_COMPLETENESS_RATE", "0.85"))
 ROW_DELTA_MAX_RATIO = float(os.getenv("SLA_MAX_ROWCOUNT_DELTA_RATIO", "0.25"))
+COMPLETENESS_DROP_MAX = float(os.getenv("SLA_MAX_COMPLETENESS_DROP", "0.05"))
 ESCALATION_EVERY_N_FAILS = int(os.getenv("SLA_ESCALATION_EVERY_N_FAILS", "2"))
 
 CHECK_SEVERITY = {
     "data_freshness": "high",
     "minimum_completeness": "high",
+    "completeness_regression": "medium",
     "failed_refresh_alerts": "critical",
     "row_count_anomaly": "medium",
 }
@@ -218,6 +220,49 @@ def check_failed_refresh_alerts(con: duckdb.DuckDBPyConnection) -> CheckResult:
     return CheckResult("failed_refresh_alerts", status, "0" if not missing else str(len(missing)), "0 missing", detail)
 
 
+def check_completeness_regression(con: duckdb.DuckDBPyConnection) -> CheckResult:
+    if not _safe_exists(con, "analytics_marts", "mart_data_quality_status"):
+        return CheckResult(
+            "completeness_regression",
+            "FAIL",
+            "missing",
+            f"drop <= {COMPLETENESS_DROP_MAX:.2f}",
+            "Data quality mart missing",
+        )
+
+    rows = con.execute(
+        """
+        select year, capacity_completeness_rate
+        from analytics_marts.mart_data_quality_status
+        where capacity_completeness_rate is not null
+        order by year desc
+        limit 2
+        """
+    ).fetchall()
+
+    if len(rows) < 2:
+        return CheckResult(
+            "completeness_regression",
+            "PASS",
+            "0.0000",
+            f"drop <= {COMPLETENESS_DROP_MAX:.2f}",
+            "Not enough history to evaluate completeness regression",
+        )
+
+    latest_year, latest_rate = rows[0]
+    prev_year, prev_rate = rows[1]
+    drop = max(0.0, float(prev_rate) - float(latest_rate))
+    status = "PASS" if drop <= COMPLETENESS_DROP_MAX else "FAIL"
+    detail = f"Completeness comparison {prev_year}->{latest_year}"
+    return CheckResult(
+        "completeness_regression",
+        status,
+        f"{drop:.4f}",
+        f"drop <= {COMPLETENESS_DROP_MAX:.2f}",
+        detail,
+    )
+
+
 def check_row_count_anomaly(con: duckdb.DuckDBPyConnection) -> CheckResult:
     if not _safe_exists(con, "analytics_facts", "fct_regional_sector_capacity"):
         return CheckResult("row_count_anomaly", "FAIL", "missing", f"<= {ROW_DELTA_MAX_RATIO:.2f}", "Fact table missing")
@@ -348,6 +393,7 @@ def persist_monitoring(
                 "freshness_threshold_days",
                 "completeness_min",
                 "row_delta_max_ratio",
+                    "completeness_drop_max",
             ],
         )
         if not log_exists:
@@ -361,6 +407,7 @@ def persist_monitoring(
                 "freshness_threshold_days": FRESHNESS_THRESHOLD_DAYS,
                 "completeness_min": COMPLETENESS_MIN,
                 "row_delta_max_ratio": ROW_DELTA_MAX_RATIO,
+                    "completeness_drop_max": COMPLETENESS_DROP_MAX,
             }
         )
 
@@ -430,6 +477,7 @@ def main() -> None:
         checks = [
             check_freshness(con),
             check_completeness(con),
+            check_completeness_regression(con),
             check_failed_refresh_alerts(con),
             check_row_count_anomaly(con),
         ]

@@ -4,9 +4,13 @@
 from __future__ import annotations
 
 import datetime as dt
+import re
 from pathlib import Path
 
 import duckdb
+import pandas as pd
+
+from ingestion.source_registry import SourceSpec, load_source_registry
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -14,29 +18,39 @@ RAW_DIR = ROOT_DIR / "data" / "raw"
 DUCKDB_PATH = ROOT_DIR / "data" / "processed" / "regional_resilience.duckdb"
 REPORT_PATH = ROOT_DIR / "data" / "reports" / "raw_load_validation_report.md"
 
-RAW_FILES = [
-    "22541-01-01-4.csv",
-    "22542-01-02-4.csv",
-    "23111-01-04-4.csv",
-]
-
-
 def table_name_for(file_name: str) -> str:
-    return f"raw_{file_name.replace('.csv', '').replace('-', '_')}"
+    stem = Path(file_name).stem
+    normalized = re.sub(r"[^a-zA-Z0-9]+", "_", stem).strip("_").lower()
+    return f"raw_{normalized}"
 
 
-def source_line_count(file_name: str) -> int:
-    text = (RAW_DIR / file_name).read_text(encoding="iso-8859-1")
-    return len(text.splitlines())
+def source_line_count(spec: SourceSpec) -> int:
+    if spec.source_format == "csv":
+        text = (RAW_DIR / spec.file_name).read_text(encoding=spec.encoding)
+        return len(text.splitlines())
+
+    if spec.source_format == "xlsx":
+        df = pd.read_excel((RAW_DIR / spec.file_name), header=None, dtype=str, sheet_name=spec.sheet_name)
+        return int(df.shape[0])
+
+    raise ValueError(f"Unsupported source format for validation: {spec.source_format}")
 
 
-def source_lines(file_name: str) -> list[str]:
-    text = (RAW_DIR / file_name).read_text(encoding="iso-8859-1")
-    return text.splitlines()
+def source_lines(spec: SourceSpec) -> list[str]:
+    if spec.source_format == "csv":
+        text = (RAW_DIR / spec.file_name).read_text(encoding=spec.encoding)
+        return text.splitlines()
+
+    if spec.source_format == "xlsx":
+        df = pd.read_excel((RAW_DIR / spec.file_name), header=None, dtype=str, sheet_name=spec.sheet_name)
+        df = df.where(pd.notnull(df), "")
+        return [";".join(str(x) for x in row) for row in df.values.tolist()]
+
+    raise ValueError(f"Unsupported source format for validation: {spec.source_format}")
 
 
-def validate_file(conn: duckdb.DuckDBPyConnection, file_name: str) -> dict[str, str | int | bool]:
-    table_name = table_name_for(file_name)
+def validate_file(conn: duckdb.DuckDBPyConnection, spec: SourceSpec) -> dict[str, str | int | bool]:
+    table_name = table_name_for(spec.file_name)
 
     table_exists = conn.execute(
         """
@@ -47,7 +61,7 @@ def validate_file(conn: duckdb.DuckDBPyConnection, file_name: str) -> dict[str, 
         [table_name],
     ).fetchone()[0] == 1
 
-    src_lines = source_lines(file_name)
+    src_lines = source_lines(spec)
     expected_rows = len(src_lines)
     loaded_rows = 0
     mojibake_rows = 0
@@ -74,7 +88,8 @@ def validate_file(conn: duckdb.DuckDBPyConnection, file_name: str) -> dict[str, 
     encoding_ok = table_exists and (mojibake_rows == 0) and (non_ascii_line_mismatches == 0)
 
     return {
-        "file_name": file_name,
+        "file_name": spec.file_name,
+        "source_format": spec.source_format,
         "table_name": table_name,
         "table_exists": table_exists,
         "expected_rows": expected_rows,
@@ -105,13 +120,13 @@ def write_report(results: list[dict[str, str | int | bool]]) -> None:
         "",
         "## File-Level Checks",
         "",
-        "| File | Raw Table | Exists | Expected Rows | Loaded Rows | Row Count Match | Mojibake Rows (`�`) | Non-ASCII Source Rows | Non-ASCII Mismatches | Encoding Check |",
-        "| --- | --- | --- | ---: | ---: | --- | ---: | ---: | ---: | --- |",
+        "| File | Format | Raw Table | Exists | Expected Rows | Loaded Rows | Row Count Match | Mojibake Rows (`�`) | Non-ASCII Source Rows | Non-ASCII Mismatches | Encoding Check |",
+        "| --- | --- | --- | --- | ---: | ---: | --- | ---: | ---: | ---: | --- |",
     ]
 
     for r in results:
         lines.append(
-            "| {file_name} | {table_name} | {table_exists} | {expected_rows} | {loaded_rows} | {row_count_match} | {mojibake_rows} | {non_ascii_source_rows} | {non_ascii_line_mismatches} | {encoding_ok} |".format(
+            "| {file_name} | {source_format} | {table_name} | {table_exists} | {expected_rows} | {loaded_rows} | {row_count_match} | {mojibake_rows} | {non_ascii_source_rows} | {non_ascii_line_mismatches} | {encoding_ok} |".format(
                 **r
             )
         )
@@ -125,6 +140,7 @@ def write_report(results: list[dict[str, str | int | bool]]) -> None:
             "2. Loaded row count equals source line count from CSV file.",
             "3. Encoding corruption check: no replacement-char rows (`�`).",
             "4. Non-ASCII integrity check: source non-ASCII lines match `raw_line` exactly by line number.",
+            "5. For XLSX sources, row-count and line-preservation checks are approximated via sheet row extraction.",
             "",
         ]
     )
@@ -133,9 +149,10 @@ def write_report(results: list[dict[str, str | int | bool]]) -> None:
 
 
 def main() -> None:
+    specs = load_source_registry()
     conn = duckdb.connect(str(DUCKDB_PATH))
     try:
-        results = [validate_file(conn, file_name) for file_name in RAW_FILES]
+        results = [validate_file(conn, spec) for spec in specs]
     finally:
         conn.close()
 

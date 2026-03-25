@@ -108,7 +108,7 @@ Suggested answer:
 
 ### 25. Is SCD Type 2 active in this project today?
 Suggested answer:
-- No. Snapshot paths are configured in dbt, but active dbt snapshot models are not yet implemented. Current history handling is based on source snapshot fields and transformed yearly records.
+- Yes, in an initial scoped rollout. dbt snapshot models are active for selected dimensions (`dim_region`, `dim_sector`). Additional dimensions remain roadmap candidates for broader Type 2 coverage.
 
 ### 26. How do we control alert fatigue?
 Suggested answer:

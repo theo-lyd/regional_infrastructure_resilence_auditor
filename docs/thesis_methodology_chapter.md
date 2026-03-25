@@ -99,7 +99,7 @@ This structure ensures analytical outputs are interpretable by both technical an
 4. Forecast outputs support prioritization, not deterministic planning.
 5. Full ad-hoc query/metric authoring in the UI is not yet implemented.
 6. End-user what-if scenario forms are not yet implemented.
-7. Formal dbt snapshot-driven SCD Type 2 handling is not yet active.
+7. dbt snapshot-driven SCD Type 2 is active for selected dimensions but not yet complete across all dimensions.
 
 ## 8.1 Operational Alerting Maturity
 

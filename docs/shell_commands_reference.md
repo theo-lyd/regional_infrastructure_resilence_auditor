@@ -32,6 +32,9 @@ This guide explains recurring shell commands used to run, validate, and operate 
 `dbt compile --project-dir dbt --profiles-dir dbt`
 - Compiles dbt SQL without executing models; useful for quick structural validation.
 
+`dbt snapshot --project-dir dbt --profiles-dir dbt`
+- Executes dbt snapshot models for SCD Type 2 tracking where configured.
+
 ## 4. Forecasting and Dashboard Signals
 
 `python src/forecasting/phase8_capacity_growth_forecast.py`
@@ -44,6 +47,9 @@ This guide explains recurring shell commands used to run, validate, and operate 
 
 `python src/monitoring/pipeline_sla_monitor.py`
 - Runs SLA checks, persists monitoring records, and generates markdown/CSV reports.
+
+`python scripts/check_docs_sync.py`
+- Verifies required operational/governance docs exist and are indexed in `docs/docs_index.md`.
 
 ## 6. Dashboard Launch
 

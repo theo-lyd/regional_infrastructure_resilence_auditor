@@ -75,6 +75,7 @@ Post-phase enhancement:
 2. dedupe logic for consecutive duplicate failures
 3. escalation rule for persistent failures every configurable N runs
 4. recovery notification when checks return from `FAIL` to `PASS`
+5. completeness regression observability check for year-over-year quality drops
 
 Thresholds are configurable via environment variables.
 
@@ -82,9 +83,16 @@ Thresholds are configurable via environment variables.
 
 Implemented monitoring artifacts:
 1. DuckDB table `analytics_monitoring.pipeline_sla_checks`
-2. CSV run log `data/reports/pipeline_run_log.csv`
-3. Markdown report `data/reports/pipeline_sla_report.md`
-4. Dashboard refresh signal file `data/reports/dashboard_refresh_signal.json`
+2. DuckDB table `analytics_monitoring.pipeline_alert_events` (alert decisioning and notification metadata)
+3. CSV run log `data/reports/pipeline_run_log.csv`
+4. Markdown report `data/reports/pipeline_sla_report.md`
+5. Dashboard refresh signal file `data/reports/dashboard_refresh_signal.json`
+
+### 10.5 Documentation Governance Guardrail
+
+Implemented CI documentation sync check:
+1. script: `scripts/check_docs_sync.py`
+2. CI step fails when required operational/governance docs are missing or not indexed in `docs/docs_index.md`
 
 ## Commands/Codes and Files Ran
 

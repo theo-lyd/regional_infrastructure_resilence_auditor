@@ -40,8 +40,8 @@ Answer approach:
 
 8. Is SCD Type 2 implemented?
 Answer approach:
-- no active dbt snapshot models yet
-- clarify that snapshot paths are configured but Type 2 tables are not active
+- yes, for an initial scoped set of dimensions (`dim_region`, `dim_sector`)
+- clarify that Type 2 rollout is active but not yet expanded to all candidate dimensions
 
 ## Data Lineage Explanation (Plain Language)
 

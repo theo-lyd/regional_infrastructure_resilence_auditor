@@ -52,6 +52,15 @@ Document what each raw CSV actually contains before transformation logic begins.
 4. Drop footer note rows, separators, license lines, and `Stand:` lines.
 5. Normalize `-` to null for numeric measure fields.
 
+## Source Registry and Format Support
+
+1. Source onboarding is now configuration-driven via `data/reference/ingestion_source_registry.json`.
+2. Supported source formats in ingestion adapter:
+- `csv`
+- `xlsx`
+3. Schema drift is checked against expected column-count ranges from the registry.
+4. Contract failures can stop ingestion when `fail_on_schema_drift=true`.
+
 ## Key Risks Identified
 
 1. Character corruption risk if encoding not forced.
