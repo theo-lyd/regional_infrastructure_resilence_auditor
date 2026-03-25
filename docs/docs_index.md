@@ -30,6 +30,7 @@ This folder is the project control center for technical and non-technical stakeh
 - `phase_9_technical_implementation.md`
 - `phase_10_technical_implementation.md`
 - `phase_11_technical_implementation.md`
+- `phase_12_roadmap.md`
 
 Each phase guide contains:
 - what was implemented
