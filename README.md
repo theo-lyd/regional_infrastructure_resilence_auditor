@@ -1,126 +1,125 @@
 # Regional Infrastructure Resilience Auditor
 
-The Regional Infrastructure Resilience Auditor is a public-sector analytics engineering project that standardizes childcare, youth welfare, and hospital infrastructure data into a unified regional resilience intelligence layer for policy planning.
+## Problem
 
-## Executive Objective
+Regional planning teams need a single, trusted decision-support layer to identify underserved areas across childcare, youth welfare, and hospital capacity. In practice, source data is fragmented, mixed-format, and hard to compare across domains and time.
 
-Build a reproducible analytics product that helps policymakers answer:
-- Which regions are underserved across childcare, youth services, and hospital capacity?
-- Where is capacity growth lagging over time?
-- Which regions face increasing near-term service pressure?
+This project turns those fragmented administrative data sources into a reproducible analytics product with traceable KPIs, forecasting outputs, and stakeholder-facing dashboards.
 
-## Target Users
+## Data Sources
 
-- Public-sector analysts
-- Regional planning teams
-- Non-technical decision-makers using dashboards
+Current source files (immutable raw inputs) are maintained in `data/raw/`:
 
-## Core Stack
+- `22541-01-01-4.csv` (childcare)
+- `22542-01-02-4.csv` (youth welfare)
+- `23111-01-04-4.csv` (hospital capacity)
 
-- DuckDB for analytical storage
-- dbt for transformations, tests, and snapshots
-- Python and SQL for ingestion, normalization, and forecasting
-- Airflow for orchestration
-- Streamlit/Metabase for dashboarding
-- GitHub Actions for CI validation
-- GitHub Codespaces for reproducible development
+Detailed inventory and caveats are documented in `docs/source_inventory.md`.
 
-## Repository Structure
+## Stack
 
-```text
-.
-├── .devcontainer/               # Codespaces/dev container setup
-├── .github/workflows/           # CI/CD workflows
-├── airflow/                     # Orchestration assets (DAGs, plugins)
-├── data/
-│   ├── raw/                     # Immutable source CSVs
-│   ├── processed/               # Processed/intermediate extracts
-│   └── reference/               # Mapping tables and standards
-├── dbt/
-│   ├── macros/
-│   ├── models/
-│   │   ├── staging/
-│   │   ├── intermediate/
-│   │   ├── dimensions/
-│   │   ├── facts/
-│   │   └── marts/
-│   ├── seeds/
-│   ├── snapshots/
-│   └── tests/
-├── docs/                        # Governance, scope, methodology
-├── reports/
-│   ├── dashboards/              # Dashboard app code/assets
-│   └── storytelling/            # Policy-facing narratives
-├── src/
-│   ├── ingestion/
-│   ├── cleaning/
-│   ├── forecasting/
-│   └── utils/
-├── .env.example                 # Environment variable template
-└── requirements.txt             # Single dependency manifest
+- Storage and query engine: DuckDB
+- Transformation and data contracts: dbt + dbt tests
+- Processing scripts: Python + SQL
+- Forecasting: interpretable regression/score-based logic
+- Orchestration: Airflow (dedicated `.airflow-venv`)
+- CI/CD: GitHub Actions
+- Decision layer: Streamlit dashboards (Metabase-compatible data layer)
+- Reproducible dev environment: GitHub Codespaces + devcontainer
+
+## Architecture
+
+Layered architecture:
+
+1. Raw ingestion (`src/ingest_raw_duckdb.py`) into `raw.*`
+2. Staging normalization (`dbt/models/staging/`)
+3. Intermediate harmonization (`dbt/models/intermediate/`)
+4. Dimensional and fact modeling (`dbt/models/dimensions/`, `dbt/models/facts/`)
+5. Decision marts (`dbt/models/marts/`)
+6. Forecasting outputs (`analytics_predictions.*`)
+7. Dashboard and narrative delivery (`reports/dashboards/`)
+8. Monitoring and SLA checks (`src/monitoring/`, `analytics_monitoring.*`)
+
+See complete diagrams and lineage in `docs/architecture_diagrams.md`.
+
+## How To Run
+
+### 1. Environment setup
+
+```bash
+cp .env.example .env
+source .venv/bin/activate
 ```
 
-## Governance Documents
+For full setup details (including Airflow environment separation), see `docs/environment_setup.md`.
 
-- `docs/project_brief.md`
-- `docs/scope.md`
-- `docs/methodology.md`
-- `docs/environment_setup.md`
-- `docs/metabase_setup.md`
+### 2. Pipeline run (manual sequence)
 
-## Documentation Hub (Defense and Watchalong)
+```bash
+python src/ingest_raw_duckdb.py
+dbt run --project-dir dbt --profiles-dir dbt
+dbt test --project-dir dbt --profiles-dir dbt
+python src/forecasting/phase8_capacity_growth_forecast.py
+python src/monitoring/dashboard_refresh_signal.py
+python src/monitoring/pipeline_sla_monitor.py
+```
 
-Use `docs/docs_index.md` as the primary navigation file.
+### 3. Dashboard run
 
-Key companion docs include:
-- phase deep-dives (`docs/phase_0_governance.md`, `docs/phase_1_repository_setup.md`, `docs/phase_2_environment_configuration.md`)
-- modeling governance (`docs/grain_definition.md`, `docs/join_strategy.md`, `docs/formula_to_model_mapping.md`)
-- source and rules (`docs/source_inventory.md`, `docs/standardization_business_rules.md`)
-- stakeholder delivery (`docs/dashboard_question_bank.md`, `docs/thesis_report_outline.md`, `docs/final_handoff.md`)
+```bash
+streamlit run reports/dashboards/policy_decision_dashboard.py
+```
 
-## Technical Principles
+### 4. Airflow orchestration
 
-1. Raw data stays raw.
-2. Cleaning and normalization are fully reproducible.
-3. Business rules are explicitly documented.
-4. Transformations are version-controlled.
-5. Dashboards must trace back to governed model outputs.
+```bash
+source .airflow-venv/bin/activate
+AIRFLOW_HOME=/workspaces/regional_infrastructure_resilence_auditor/airflow airflow db init
+AIRFLOW_HOME=/workspaces/regional_infrastructure_resilence_auditor/airflow AIRFLOW__CORE__DAGS_FOLDER=/workspaces/regional_infrastructure_resilence_auditor/airflow/dags airflow dags list
+```
 
-## Quick Start (Codespaces or Local)
+## Key Findings Snapshot (Latest Run)
 
-1. Open this repository in GitHub Codespaces.
-2. Let post-create setup run from `.devcontainer/post-create.sh`.
-3. Copy environment template: `cp .env.example .env`.
-4. Place source CSV files in `data/raw/`.
-5. Build ingestion and transformation layers in `src/` and `dbt/`.
-6. Serve dashboard prototypes from `reports/dashboards/`.
+From latest generated outputs:
 
-For detailed setup and troubleshooting, see `docs/environment_setup.md`.
+- Latest KPI year: `2020`
+- Average service maturity: `0.1439`
+- Average resilience score: `0.0935`
+- Data quality status: `good`
+- Capacity completeness: `100%`
+- Forecast high-risk region-sector rows: `471`
 
-## Current Implementation Status
+Example top underserved regions (latest year):
 
-- Phase 0 complete: project framing, KPI framework, methodology baseline.
-- Phase 1 complete: repository scaffold, folder conventions, Codespaces setup.
-- Phase 2 complete: reproducible environment provisioning and dependency manifests.
-- Phase 3 complete: source inventory and field-level audit documentation.
-- Phase 4 complete: reproducible raw ingestion and validation pipeline in DuckDB.
-- Phase 5 complete: dbt initialization, sources, staging models, and baseline tests.
-- Phase 6 complete: standardization macros, cleaned staging, and documented business rules.
-- Phase 7 complete: dimensions, intermediate metrics, facts, and KPI marts.
-- Phase 8 complete: executive overview dashboard batch (D1) and data quality status mart.
-- Phase 9 complete: multi-view policy dashboard, storytelling annotations, KPI summary views, and screenshot assets.
-- Phase 10 complete: Airflow orchestration, CI workflow, SLA monitoring checks, and pipeline logging outputs.
+- Landkreis Ludwigslust
+- Kelheim, Landkreis
+- Ostvorpommern, Landkreis
+- Stralsund, Hansestadt, kreisfreie Stadt
+- Zwickau, kreisfreie Stadt
 
-## Dashboard Storytelling Assets
+## Dashboard Assets
 
-Phase 9 screenshot outputs (for README/thesis inclusion):
+Phase 9 screenshot assets:
+
 - `reports/storytelling/screenshots/phase9_executive_overview.png`
 - `reports/storytelling/screenshots/phase9_underserved_regions.png`
 - `reports/storytelling/screenshots/phase9_predictive_risk.png`
 
-## Public-Sector Presentation Note
+## Documentation For Defense and Interview
 
-This project is intentionally documented for non-technical and technical audiences, including stakeholder review and defense use cases in Berlin.
+Primary navigation: `docs/docs_index.md`
+
+Phase 11 defense package:
+
+- methodology chapter: `docs/thesis_methodology_chapter.md`
+- final presentation deck (markdown): `docs/final_presentation_deck.md`
+- architecture and KPI diagrams: `docs/architecture_diagrams.md`
+- defense Q&A and lessons learned: `docs/defense_qa_and_lessons.md`
+
+## Phase Status
+
+- Phase 0 to Phase 10 completed.
+- Phase 11 completed: documentation, defense, and portfolio packaging.
 
 ## License
 

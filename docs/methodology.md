@@ -1,66 +1,171 @@
 # Methodology
 
+## Objective and Methodological Position
+
+The methodology is designed for public-sector decision support where interpretability, reproducibility, and governance are prioritized over model complexity.
+
+The project follows a layered analytics engineering approach:
+
+1. preserve raw source integrity
+2. normalize and standardize reproducibly
+3. construct conformed analytical entities (dimensions/facts/marts)
+4. publish policy-oriented KPIs and forecasting outputs
+5. enforce quality through tests, CI, and SLA monitoring
+
+## Data Model
+
+### Layered Model
+
+1. Raw layer (`raw.*` in DuckDB)
+- immutable ingestion of source rows and lines
+
+2. Staging layer (`analytics_staging.*`)
+- schema harmonization, type coercion, value cleaning
+- sector-specific cleaned long-format outputs (`stg_clean_*`)
+
+3. Intermediate layer (`analytics_intermediate.*`)
+- regional/year aggregations by sector
+- cross-sector aligned metric table
+- year-over-year trend features
+
+4. Dimensions (`analytics_dimensions.*`)
+- `dim_region`
+- `dim_time`
+- `dim_sector`
+
+5. Facts (`analytics_facts.*`)
+- `fct_regional_sector_capacity`
+
+6. Marts (`analytics_marts.*`)
+- resilience, underserved, coverage gap, growth/concentration, benchmark, quality, and KPI summaries
+
+7. Predictions (`analytics_predictions.*`)
+- capacity growth forecast outputs, evaluation summary, and model coefficients/weights
+
+### Grain and Join Strategy
+
+Primary analytical grain is `region_code x sector_id x year` for cross-sector comparability. Dimension joins use canonical region codes and normalized sector keys.
+
+## Normalization Rules
+
+Normalization is centralized in dbt macros and documented governance rules.
+
+### Key Rule Categories
+
+1. Missing values
+- known sentinels (such as `-`, `k. A.`, `n/a`) are normalized to `NULL`
+
+2. Numeric parsing
+- locale-safe conversion for comma decimals
+- support for million notation and range midpoint treatment where appropriate
+
+3. Region canonicalization
+- preserve leading zeros in region codes
+- canonical name mapping and region-level classification
+- umlaut-preserving canonical policy
+
+4. Temporal normalization
+- normalized snapshot year fields and period descriptors
+
+5. Category standardization
+- controlled category codes and sector labels to guarantee metric compatibility
+
 ## KPI Framework
 
-### Childcare Capacity KPIs
-- Facility count: number of childcare facilities by region and year
-- Approved places: total approved childcare places by region and year
-- Places per facility: approved places divided by facility count
-- Growth rate: year-over-year change in approved places
-- Coverage index: normalized childcare availability versus benchmark
+### Domain KPIs
 
-### Youth Welfare KPIs
-- Youth service places: total youth welfare places by region and year
-- Places per region: normalized service capacity at regional level
-- Regional coverage ratio: regional capacity relative to benchmark
-- Trend slope: direction and magnitude of capacity change over time
+Childcare:
+- facility count
+- approved places
+- places per facility
+- growth rate
 
-### Hospital Infrastructure KPIs
-- Hospital bed count: total beds by region, year, and specialty
-- Beds per hospital: average bed capacity per hospital (where hospital count exists)
-- Specialty concentration: concentration metric of specialty beds in a region
-- Bed growth rate: year-over-year change in bed capacity
-- Specialty resilience score: robustness of specialty coverage across regions
+Youth welfare:
+- places total
+- facilities total
+- places per facility
+- trend metrics
+
+Hospital capacity:
+- beds total
+- hospitals total
+- beds per hospital
+- specialty concentration proxy
 
 ### Cross-Sector KPIs
-- Service Maturity Index: composite indicator across childcare, youth welfare, and hospital capacity
-- Underserved Region Score: weighted multi-domain deficit score
-- Coverage Gap Index: benchmark minus observed provision
-- Infrastructure Resilience Score: combined stability and growth score
-- Forecasted Pressure Index: predicted near-term under-provision risk
+
+- Service Maturity Index
+- Underserved Region Score
+- Coverage Gap Index
+- Growth and Concentration Trend
+- Capacity Benchmark Ratio
+- Composite Resilience Score
 
 ### Data Quality KPIs
-- Completeness rate
-- Null rate
-- Standardization success rate
-- Freshness compliance
-- SLA breach count
 
-## Technical Principles
-1. Raw data stays raw: source files are stored unchanged in `data/raw/`.
-2. All cleaning is reproducible: no manual spreadsheet edits or opaque one-off fixes.
-3. All business rules are documented: normalization and scoring logic lives in versioned docs and code.
-4. All transformations are version-controlled: SQL and Python pipelines are tracked in Git.
-5. Dashboards must trace back to model outputs: every chart must map to defined marts/KPIs.
+- completeness rate
+- data quality status class
+- freshness and SLA compliance indicators
 
-## Business Rule Baseline
-- Missing values: standardized sentinel handling with explicit null policy by metric type.
-- Abbreviations: normalized through controlled mapping tables in `data/reference/`.
-- Numeric parsing: locale-safe conversion for decimal and thousand separators.
-- Region standardization: canonical region keys and labels across all source domains.
-- Service maturity computation: weighted, documented composite of standardized capacity indicators.
-- Underserved identification: threshold and ranking approach based on normalized deficits.
-- Predictive thresholds: transparent cutoffs for warning and risk bands.
+## Predictive Logic
 
-## Layered Data Model
-- Raw layer: immutable ingestion artifacts.
-- Staging layer: standardized headers, encoding, values, and labels.
-- Intermediate layer: reusable aggregates and normalized analytical structures.
-- Mart layer: decision-ready outputs (`mart_service_maturity`, `mart_underserved_regions`, `mart_capacity_trends`, `mart_predictive_risk`, `mart_data_quality`).
-- Dimensions: `dim_region`, `dim_time`, `dim_sector`, `dim_specialty`.
-- Facts: `fact_childcare_capacity`, `fact_youth_service_capacity`, `fact_hospital_beds`, `fact_cross_sector_resilience`.
+### Prediction Target
 
-## Predictive Approach
-- Methods: trend extrapolation, moving averages, linear regression, and composite risk scoring.
-- Priorities: interpretability, low operational complexity, policy relevance.
-- Outputs: forecasted capacity, uncertainty indicator, regional risk ranking, warning thresholds.
+Selected target: capacity growth forecast.
+
+Formally:
+
+`target_growth_next_year = (capacity_{t+1} - capacity_t) / capacity_t`
+
+### Feature Engineering
+
+1. prior-year growth
+2. moving average (3-year) capacity
+3. service concentration
+4. regional deficit trend
+
+### Model Choice and Fallback
+
+Primary mode:
+- interpretable linear regression when supervised next-year labels are available
+
+Fallback mode:
+- score-based extrapolation with explicit weights when historical labels are insufficient
+
+### Evaluation
+
+When supervised holdout is possible:
+- trend fit (`R^2`, MAE)
+- directional accuracy
+
+When fallback mode is used:
+- transparent coefficients/weights and rule-based risk bands are still produced
+
+### Risk Banding
+
+- high risk: predicted growth < -5%
+- watch: -5% to < 2%
+- stable or growth: >= 2%
+
+## Quality and Reproducibility Controls
+
+1. dbt tests for uniqueness, not-null, accepted values, and relationships
+2. GitHub Actions for lint, compile, and test checks
+3. Airflow DAG orchestration for repeatable scheduled runs
+4. SLA monitoring for freshness, completeness, refresh integrity, and row-count anomaly detection
+
+## Limitations
+
+1. Source granularity and historical depth can limit supervised predictive performance.
+2. Cross-domain comparability is partly constrained by heterogeneous source definitions.
+3. Fallback score-based forecasting is intentionally conservative and should be interpreted as early warning, not causal inference.
+4. Regional rankings can be sensitive to changes in source publication practices.
+5. Current monitoring is threshold-based; advanced anomaly detection is a future enhancement.
+
+## Methodological Rationale
+
+This methodology intentionally balances technical rigor with interpretability for policy workflows:
+
+- reproducible pipelines over opaque manual handling
+- explainable indicators over black-box optimization
+- governance-first documentation for audit, defense, and handoff

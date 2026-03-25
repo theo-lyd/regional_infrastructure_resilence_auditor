@@ -29,6 +29,7 @@ This folder is the project control center for technical and non-technical stakeh
 - `phase_8_technical_implementation.md`
 - `phase_9_technical_implementation.md`
 - `phase_10_technical_implementation.md`
+- `phase_11_technical_implementation.md`
 
 Each phase guide contains:
 - what was implemented
@@ -53,6 +54,10 @@ Each phase guide contains:
 - `dashboard_question_bank.md`: decision questions mapped to dashboard pages and batches.
 - `thesis_report_outline.md`: defense-ready long-form report structure.
 - `final_handoff.md`: operations handoff checklist and support model.
+- `thesis_methodology_chapter.md`: thesis-ready methodology chapter draft.
+- `final_presentation_deck.md`: final presentation deck draft (slide-by-slide).
+- `architecture_diagrams.md`: architecture, KPI composition, lineage, and orchestration diagrams.
+- `defense_qa_and_lessons.md`: stakeholder Q&A, interview prompts, and lessons learned.
 
 ## Reading Order (Novice Friendly)
 
