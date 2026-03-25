@@ -184,6 +184,12 @@ latest = exec_for_year.iloc[0]
 latest_year = int(latest["year"])
 
 exec_trend = executive[executive["year"] <= latest_year].copy().sort_values("year")
+baseline = exec_trend.iloc[0]
+baseline_year = int(baseline["year"])
+
+delta_maturity = float(latest["avg_service_maturity"] - baseline["avg_service_maturity"])
+delta_resilience = float(latest["avg_resilience_score"] - baseline["avg_resilience_score"])
+
 quality_filtered = quality[quality["year"] == latest_year].copy()
 
 underserved_filtered = underserved[underserved["year"] == latest_year].copy()
@@ -240,6 +246,22 @@ with tab1:
         st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
         st.metric("Data Quality", str(latest["data_quality_status"]).upper(), help="Quality status derived from completeness thresholds.")
         st.markdown("</div>", unsafe_allow_html=True)
+
+    b1, b2 = st.columns(2)
+    with b1:
+        st.metric(
+            f"Service Maturity: {baseline_year} to {latest_year}",
+            f"{latest['avg_service_maturity']:.3f}",
+            f"{delta_maturity:+.3f}",
+            help="Shows selected-year service maturity with change versus first available year baseline.",
+        )
+    with b2:
+        st.metric(
+            f"Resilience: {baseline_year} to {latest_year}",
+            f"{latest['avg_resilience_score']:.3f}",
+            f"{delta_resilience:+.3f}",
+            help="Shows selected-year resilience with change versus first available year baseline.",
+        )
 
     st.markdown("#### Service Maturity by Year")
     st.line_chart(exec_trend.set_index("year")[["avg_service_maturity", "avg_resilience_score"]], use_container_width=True)
