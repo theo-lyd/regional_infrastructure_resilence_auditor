@@ -234,3 +234,8 @@ Thumbsdb
 *.swp
 *.swo
 *~
+
+# Project-specific: dbt local artifacts
+dbt/target/
+dbt/logs/
+dbt/.user.yml

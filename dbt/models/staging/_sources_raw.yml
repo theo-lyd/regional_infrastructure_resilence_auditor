@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: raw_22541_01_01_4
+        description: Raw childcare CSV lines loaded from 22541-01-01-4.csv
+      - name: raw_22542_01_02_4
+        description: Raw youth welfare CSV lines loaded from 22542-01-02-4.csv
+      - name: raw_23111_01_04_4
+        description: Raw hospital CSV lines loaded from 23111-01-04-4.csv

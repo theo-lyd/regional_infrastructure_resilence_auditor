@@ -1,0 +1,80 @@
+version: 2
+
+models:
+  - name: stg_region_codes
+    columns:
+      - name: region_code_clean
+        tests:
+          - not_null
+          - unique
+      - name: region_level
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['national', 'state', 'regierungsbezirk', 'kreis', 'special', 'unknown']
+
+  - name: stg_childcare_22541
+    columns:
+      - name: region_year_key
+        tests:
+          - not_null
+          - unique
+      - name: snapshot_date_raw
+        tests:
+          - not_null
+      - name: region_code_clean
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_region_codes')
+                field: region_code_clean
+      - name: region_level
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['national', 'state', 'regierungsbezirk', 'kreis', 'special', 'unknown']
+
+  - name: stg_youth_22542
+    columns:
+      - name: region_year_key
+        tests:
+          - not_null
+          - unique
+      - name: snapshot_date_raw
+        tests:
+          - not_null
+      - name: region_code_clean
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_region_codes')
+                field: region_code_clean
+      - name: region_level
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['national', 'state', 'regierungsbezirk', 'kreis', 'special', 'unknown']
+
+  - name: stg_hospital_23111
+    columns:
+      - name: region_year_key
+        tests:
+          - not_null
+          - unique
+      - name: snapshot_date_raw
+        tests:
+          - not_null
+      - name: region_code_clean
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_region_codes')
+                field: region_code_clean
+      - name: region_level
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['national', 'state', 'regierungsbezirk', 'kreis', 'special', 'unknown']

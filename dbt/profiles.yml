@@ -1,0 +1,8 @@
+regional_infrastructure_resilience_auditor:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DBT_DUCKDB_PATH', '/workspaces/regional_infrastructure_resilence_auditor/data/processed/regional_resilience.duckdb') }}"
+      threads: 4
+      schema: analytics
