@@ -2,6 +2,9 @@
 
 This document provides a comprehensive overview of all Git commands used throughout the Regional Infrastructure Resilience Auditor project, with explanations of what each does and the context in which it was used.
 
+For non-Git runtime/shell commands (ingestion, dbt, forecasting, monitoring, launcher), see `docs/shell_commands_reference.md`.
+For explicit implemented vs not-implemented feature boundaries, see `docs/current_state_capabilities_and_gaps.md`.
+
 ---
 
 ## Table of Contents

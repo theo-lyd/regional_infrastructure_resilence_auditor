@@ -57,6 +57,36 @@ SLA_MAX_ROWCOUNT_DELTA_RATIO=0.25
 - `FAIL`: observed value violates threshold or required table is missing.
 - Failures are logged to DuckDB and included in CSV/Markdown outputs.
 
+## Severity Model (Lightweight)
+
+- `failed_refresh_alerts`: `critical`
+- `data_freshness`: `high`
+- `minimum_completeness`: `high`
+- `row_count_anomaly`: `medium`
+
+Severity is persisted with each check result and used for triage priority in monitoring outputs.
+
+## Dedupe and Escalation Rules
+
+Implemented anti-fatigue logic:
+
+1. New incident notification:
+- Trigger when a check transitions from `PASS` to `FAIL`.
+
+2. Duplicate suppression:
+- Consecutive duplicate failures are suppressed by default to reduce noisy repeat alerts.
+
+3. Escalation:
+- Persistent failures are escalated every `N` consecutive runs.
+- Config: `SLA_ESCALATION_EVERY_N_FAILS` (default `2`).
+
+4. Recovery notification:
+- Trigger when a check transitions from `FAIL` to `PASS`.
+
+Persisted artifacts:
+- `analytics_monitoring.pipeline_alert_events` (decision and notification tracking)
+- markdown report section `Alert Decisions (Dedupe and Escalation)`
+
 ## Alert Routing (When Freshness/Completeness Fails)
 
 Keep routing lightweight and deterministic.

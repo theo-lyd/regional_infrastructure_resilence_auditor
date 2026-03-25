@@ -65,11 +65,15 @@
 - historical depth limitations
 - source heterogeneity and publication variability
 - forecasts are directional, not deterministic
+- no end-user ad-hoc query/metric builder in current UI
+- no end-user what-if scenario form in current UI
+- dbt snapshot-based SCD Type 2 not yet active
 
 ## Slide 14 — Lessons Learned
 - interpretability drives adoption
 - governance documentation is a product feature
 - monitoring and SLA checks are essential for trust
+- severity + dedupe/escalation alert rules reduce alert fatigue and improve triage focus
 
 ## Slide 15 — Next Steps
 - richer predictive model comparison

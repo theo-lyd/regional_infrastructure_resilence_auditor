@@ -97,6 +97,20 @@ This structure ensures analytical outputs are interpretable by both technical an
 2. Cross-domain comparability depends on source quality and publication practices.
 3. Composite indices simplify reality and should not replace domain expertise.
 4. Forecast outputs support prioritization, not deterministic planning.
+5. Full ad-hoc query/metric authoring in the UI is not yet implemented.
+6. End-user what-if scenario forms are not yet implemented.
+7. Formal dbt snapshot-driven SCD Type 2 handling is not yet active.
+
+## 8.1 Operational Alerting Maturity
+
+The monitoring subsystem classifies check severity and applies anti-fatigue rules:
+
+1. severity classes: critical, high, medium
+2. duplicate consecutive failure suppression
+3. periodic escalation for persistent incidents
+4. recovery notifications on FAIL-to-PASS transitions
+
+This improves operational signal quality while preserving governance traceability.
 
 ## 9. Methodological Contribution
 

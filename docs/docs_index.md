@@ -48,6 +48,7 @@ Each phase guide contains:
 - `data_dictionary.md`: canonical field glossary and business meaning.
 - `predictive_assumptions.md`: forecasting target, feature logic, evaluation assumptions, and risk band policy.
 - `sla_monitoring.md`: SLA thresholds, monitoring logic, and alert interpretation.
+- `current_state_capabilities_and_gaps.md`: explicit implemented/not-implemented status, SCD position, alerting model, and data robustness boundaries.
 
 ## Stakeholder Delivery
 
@@ -60,6 +61,7 @@ Each phase guide contains:
 - `defense_qa_and_lessons.md`: stakeholder Q&A, interview prompts, and lessons learned.
 - `interview_question_bank_with_answers.md`: business, theoretical, and technical interview questions with suggested answers.
 - `git_commands_reference.md`: detailed explanation of Git commands used across project phases.
+- `shell_commands_reference.md`: command-by-command explanation for runtime, pipeline, monitoring, and launcher operations.
 - `system_launch_modes.md`: one-command and clickable launch options for technical and non-technical users.
 
 ## Reading Order (Novice Friendly)

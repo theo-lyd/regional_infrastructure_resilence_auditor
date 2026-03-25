@@ -21,6 +21,14 @@ MARKDOWN_REPORT_PATH = REPORTS_DIR / "pipeline_sla_report.md"
 FRESHNESS_THRESHOLD_DAYS = int(os.getenv("SLA_MAX_PREDICTION_STALENESS_DAYS", "30"))
 COMPLETENESS_MIN = float(os.getenv("SLA_MIN_COMPLETENESS_RATE", "0.85"))
 ROW_DELTA_MAX_RATIO = float(os.getenv("SLA_MAX_ROWCOUNT_DELTA_RATIO", "0.25"))
+ESCALATION_EVERY_N_FAILS = int(os.getenv("SLA_ESCALATION_EVERY_N_FAILS", "2"))
+
+CHECK_SEVERITY = {
+    "data_freshness": "high",
+    "minimum_completeness": "high",
+    "failed_refresh_alerts": "critical",
+    "row_count_anomaly": "medium",
+}
 
 
 @dataclass
@@ -30,6 +38,120 @@ class CheckResult:
     observed_value: str
     threshold_value: str
     detail: str
+
+
+@dataclass
+class AlertDecision:
+    check_name: str
+    status: str
+    severity: str
+    decision: str
+    reason: str
+    consecutive_failures: int
+    is_notification: bool
+
+
+def severity_for_check(check_name: str) -> str:
+    return CHECK_SEVERITY.get(check_name, "medium")
+
+
+def recent_statuses(con: duckdb.DuckDBPyConnection, check_name: str, limit: int = 8) -> list[str]:
+    if not _safe_exists(con, "analytics_monitoring", "pipeline_sla_checks"):
+        return []
+
+    rows = con.execute(
+        """
+        select status
+        from analytics_monitoring.pipeline_sla_checks
+        where check_name = ?
+        order by run_timestamp_utc desc
+        limit ?
+        """,
+        [check_name, limit],
+    ).fetchall()
+    return [str(r[0]) for r in rows if r and r[0] is not None]
+
+
+def build_alert_decisions(con: duckdb.DuckDBPyConnection, checks: list[CheckResult]) -> list[AlertDecision]:
+    decisions: list[AlertDecision] = []
+
+    for c in checks:
+        severity = severity_for_check(c.check_name)
+        history = recent_statuses(con, c.check_name)
+        last_status = history[0] if history else None
+
+        prev_consecutive_fails = 0
+        for s in history:
+            if s == "FAIL":
+                prev_consecutive_fails += 1
+            else:
+                break
+
+        if c.status == "FAIL":
+            consecutive = prev_consecutive_fails + 1
+            if last_status != "FAIL":
+                decisions.append(
+                    AlertDecision(
+                        check_name=c.check_name,
+                        status=c.status,
+                        severity=severity,
+                        decision="notify_new_incident",
+                        reason="Status changed PASS->FAIL (or first observed run)",
+                        consecutive_failures=consecutive,
+                        is_notification=True,
+                    )
+                )
+            elif ESCALATION_EVERY_N_FAILS > 0 and consecutive % ESCALATION_EVERY_N_FAILS == 0:
+                decisions.append(
+                    AlertDecision(
+                        check_name=c.check_name,
+                        status=c.status,
+                        severity=severity,
+                        decision="notify_escalation",
+                        reason=f"Persistent failure reached {consecutive} consecutive runs",
+                        consecutive_failures=consecutive,
+                        is_notification=True,
+                    )
+                )
+            else:
+                decisions.append(
+                    AlertDecision(
+                        check_name=c.check_name,
+                        status=c.status,
+                        severity=severity,
+                        decision="suppress_duplicate",
+                        reason="Consecutive duplicate failure suppressed to reduce alert fatigue",
+                        consecutive_failures=consecutive,
+                        is_notification=False,
+                    )
+                )
+        else:
+            if last_status == "FAIL":
+                decisions.append(
+                    AlertDecision(
+                        check_name=c.check_name,
+                        status=c.status,
+                        severity=severity,
+                        decision="notify_recovery",
+                        reason="Status changed FAIL->PASS",
+                        consecutive_failures=0,
+                        is_notification=True,
+                    )
+                )
+            else:
+                decisions.append(
+                    AlertDecision(
+                        check_name=c.check_name,
+                        status=c.status,
+                        severity=severity,
+                        decision="no_alert",
+                        reason="Healthy status with no active incident",
+                        consecutive_failures=0,
+                        is_notification=False,
+                    )
+                )
+
+    return decisions
 
 
 def _safe_exists(con: duckdb.DuckDBPyConnection, schema: str, table: str) -> bool:
@@ -123,7 +245,12 @@ def check_row_count_anomaly(con: duckdb.DuckDBPyConnection) -> CheckResult:
     return CheckResult("row_count_anomaly", status, f"{delta_ratio:.4f}", f"<= {ROW_DELTA_MAX_RATIO:.2f}", detail)
 
 
-def persist_monitoring(con: duckdb.DuckDBPyConnection, checks: list[CheckResult], run_status: str) -> None:
+def persist_monitoring(
+    con: duckdb.DuckDBPyConnection,
+    checks: list[CheckResult],
+    decisions: list[AlertDecision],
+    run_status: str,
+) -> None:
     con.execute("create schema if not exists analytics_monitoring")
     con.execute(
         """
@@ -132,9 +259,28 @@ def persist_monitoring(con: duckdb.DuckDBPyConnection, checks: list[CheckResult]
             run_timestamp_utc varchar,
             check_name varchar,
             status varchar,
+            severity varchar,
             observed_value varchar,
             threshold_value varchar,
             detail varchar
+        )
+        """
+    )
+
+    con.execute("alter table analytics_monitoring.pipeline_sla_checks add column if not exists severity varchar")
+
+    con.execute(
+        """
+        create table if not exists analytics_monitoring.pipeline_alert_events (
+            run_id varchar,
+            run_timestamp_utc varchar,
+            check_name varchar,
+            status varchar,
+            severity varchar,
+            decision varchar,
+            reason varchar,
+            consecutive_failures integer,
+            is_notification boolean
         )
         """
     )
@@ -143,17 +289,49 @@ def persist_monitoring(con: duckdb.DuckDBPyConnection, checks: list[CheckResult]
     run_ts = datetime.now(timezone.utc).isoformat()
 
     rows = [
-        (run_id, run_ts, c.check_name, c.status, c.observed_value, c.threshold_value, c.detail)
+        (
+            run_id,
+            run_ts,
+            c.check_name,
+            c.status,
+            severity_for_check(c.check_name),
+            c.observed_value,
+            c.threshold_value,
+            c.detail,
+        )
         for c in checks
     ]
 
     con.executemany(
         """
         insert into analytics_monitoring.pipeline_sla_checks
-        (run_id, run_timestamp_utc, check_name, status, observed_value, threshold_value, detail)
-        values (?, ?, ?, ?, ?, ?, ?)
+        (run_id, run_timestamp_utc, check_name, status, severity, observed_value, threshold_value, detail)
+        values (?, ?, ?, ?, ?, ?, ?, ?)
         """,
         rows,
+    )
+
+    decision_rows = [
+        (
+            run_id,
+            run_ts,
+            d.check_name,
+            d.status,
+            d.severity,
+            d.decision,
+            d.reason,
+            d.consecutive_failures,
+            d.is_notification,
+        )
+        for d in decisions
+    ]
+    con.executemany(
+        """
+        insert into analytics_monitoring.pipeline_alert_events
+        (run_id, run_timestamp_utc, check_name, status, severity, decision, reason, consecutive_failures, is_notification)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        decision_rows,
     )
 
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -192,13 +370,25 @@ def persist_monitoring(con: duckdb.DuckDBPyConnection, checks: list[CheckResult]
         f"Generated at (UTC): {run_ts}",
         f"Overall status: {run_status}",
         "",
-        "| Check | Status | Observed | Threshold | Detail |",
-        "| --- | --- | --- | --- | --- |",
+        "| Check | Status | Severity | Observed | Threshold | Detail |",
+        "| --- | --- | --- | --- | --- | --- |",
     ]
 
     for c in checks:
         lines.append(
-            f"| {c.check_name} | {c.status} | {c.observed_value} | {c.threshold_value} | {c.detail} |"
+            f"| {c.check_name} | {c.status} | {severity_for_check(c.check_name)} | {c.observed_value} | {c.threshold_value} | {c.detail} |"
+        )
+
+    lines.extend([
+        "",
+        "## Alert Decisions (Dedupe and Escalation)",
+        "",
+        "| Check | Status | Severity | Decision | Consecutive Fails | Notify | Reason |",
+        "| --- | --- | --- | --- | ---: | --- | --- |",
+    ])
+    for d in decisions:
+        lines.append(
+            f"| {d.check_name} | {d.status} | {d.severity} | {d.decision} | {d.consecutive_failures} | {str(d.is_notification).lower()} | {d.reason} |"
         )
 
     freshness_failed = any(c.check_name == "data_freshness" and c.status == "FAIL" for c in checks)
@@ -243,13 +433,16 @@ def main() -> None:
             check_failed_refresh_alerts(con),
             check_row_count_anomaly(con),
         ]
+        decisions = build_alert_decisions(con, checks)
         run_status = "PASS" if all(c.status == "PASS" for c in checks) else "FAIL"
-        persist_monitoring(con, checks, run_status)
+        persist_monitoring(con, checks, decisions, run_status)
     finally:
         con.close()
 
     failed = [c for c in checks if c.status == "FAIL"]
+    notify_events = [d for d in decisions if d.is_notification]
     print(f"SLA checks completed. Overall status: {run_status}")
+    print(f"Alert notifications emitted: {len(notify_events)}")
     if failed:
         for c in failed:
             print(f"FAILED: {c.check_name} - {c.detail}")

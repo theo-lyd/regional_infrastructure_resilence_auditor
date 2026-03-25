@@ -98,6 +98,22 @@ Suggested answer:
 Suggested answer:
 - Define baseline intervention latency and targeting precision before deployment, then compare post-deployment improvements in prioritization speed and allocation quality.
 
+### 23. Do we already support end-user ad-hoc query and custom metric builders?
+Suggested answer:
+- Not yet. The dashboard currently supports guided filtering/sorting and governed KPI views. Full ad-hoc querying and user-defined metric authoring are intentionally deferred because they require semantic governance, security guardrails, and stronger performance controls.
+
+### 24. Do we already support end-user what-if simulation forms?
+Suggested answer:
+- Not yet in the dashboard UI. Forecasting can be rerun operationally, but interactive scenario editing is deferred until assumption validation, explainability controls, and scenario audit logging are implemented.
+
+### 25. Is SCD Type 2 active in this project today?
+Suggested answer:
+- No. Snapshot paths are configured in dbt, but active dbt snapshot models are not yet implemented. Current history handling is based on source snapshot fields and transformed yearly records.
+
+### 26. How do we control alert fatigue?
+Suggested answer:
+- SLA monitoring now classifies check severity (critical/high/medium), suppresses duplicate consecutive failures, escalates persistent incidents at configurable intervals, and sends recovery notifications when checks return to PASS.
+
 ## E. Presentation Strategy Tips
 
 1. Open with problem and public value, not tools.

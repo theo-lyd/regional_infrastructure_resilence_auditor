@@ -70,6 +70,12 @@ Implemented threshold-based checks for:
 3. failed refresh alerts (missing required outputs)
 4. row-count anomaly detection
 
+Post-phase enhancement:
+1. lightweight severity model (`critical`, `high`, `medium`) per check type
+2. dedupe logic for consecutive duplicate failures
+3. escalation rule for persistent failures every configurable N runs
+4. recovery notification when checks return from `FAIL` to `PASS`
+
 Thresholds are configurable via environment variables.
 
 ### 10.4 Monitoring Outputs

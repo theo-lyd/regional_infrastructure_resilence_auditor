@@ -27,6 +27,22 @@ Answer approach:
 - prioritize highest-risk and highest-underserved overlap regions
 - assign domain leads by sector pressure type
 
+6. Do we support ad-hoc query builders or user-authored metrics in the UI today?
+Answer approach:
+- no, not currently
+- explain this as an intentional governance choice to prevent metric drift and uncontrolled query behavior in a public-sector context
+- point to roadmap item in `docs/current_state_capabilities_and_gaps.md`
+
+7. Do we support end-user what-if simulation forms today?
+Answer approach:
+- no, not currently
+- explain that forecasting is operationally rerunnable but scenario authoring in UI requires stronger assumption validation and scenario traceability
+
+8. Is SCD Type 2 implemented?
+Answer approach:
+- no active dbt snapshot models yet
+- clarify that snapshot paths are configured but Type 2 tables are not active
+
 ## Data Lineage Explanation (Plain Language)
 
 1. Source files are ingested unchanged into raw tables.
@@ -44,6 +60,8 @@ Answer approach:
 4. Structured phase documentation dramatically improves defense readiness.
 5. Forecasting needs explicit fallback behavior when historical supervision is limited.
 6. Governance artifacts (rules, lineage, tests) are as important as model code.
+7. Alert fatigue controls (severity plus dedupe/escalation) materially improve operational signal quality.
+8. Explicitly documenting what is not yet implemented improves defense credibility.
 
 ## Interview Talking Points
 

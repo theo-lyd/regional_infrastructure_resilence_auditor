@@ -1,14 +1,23 @@
 # Pipeline SLA Report
 
-Generated at (UTC): 2026-03-25T14:46:26.098617+00:00
+Generated at (UTC): 2026-03-25T15:50:21.833605+00:00
 Overall status: PASS
 
-| Check | Status | Observed | Threshold | Detail |
-| --- | --- | --- | --- | --- |
-| data_freshness | PASS | 0 | <= 30 | Latest forecast generated at 2026-03-25T13:21:05.352883 |
-| minimum_completeness | PASS | 1.0000 | >= 0.85 | Latest completeness from year 2020 |
-| failed_refresh_alerts | PASS | 0 | 0 missing | All required refresh outputs present |
-| row_count_anomaly | PASS | 0.0000 | <= 0.25 | Row count comparison 2020 vs previous year |
+| Check | Status | Severity | Observed | Threshold | Detail |
+| --- | --- | --- | --- | --- | --- |
+| data_freshness | PASS | high | 0 | <= 30 | Latest forecast generated at 2026-03-25T14:48:42.526373 |
+| minimum_completeness | PASS | high | 1.0000 | >= 0.85 | Latest completeness from year 2020 |
+| failed_refresh_alerts | PASS | critical | 0 | 0 missing | All required refresh outputs present |
+| row_count_anomaly | PASS | medium | 0.0000 | <= 0.25 | Row count comparison 2020 vs previous year |
+
+## Alert Decisions (Dedupe and Escalation)
+
+| Check | Status | Severity | Decision | Consecutive Fails | Notify | Reason |
+| --- | --- | --- | --- | ---: | --- | --- |
+| data_freshness | PASS | high | no_alert | 0 | false | Healthy status with no active incident |
+| minimum_completeness | PASS | high | no_alert | 0 | false | Healthy status with no active incident |
+| failed_refresh_alerts | PASS | critical | no_alert | 0 | false | Healthy status with no active incident |
+| row_count_anomaly | PASS | medium | no_alert | 0 | false | Healthy status with no active incident |
 
 ## Alert Routing Note
 
