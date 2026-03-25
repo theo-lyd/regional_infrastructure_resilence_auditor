@@ -14,6 +14,9 @@ This guide defines how to launch the system for technical and non-technical user
 - `scripts/launch_full_system.desktop`
 - `scripts/launch_frontend.desktop`
 
+You do not need to manually activate .venv when using the launcher script; it directly calls the binaries in .venv.
+The .desktop launchers are for Linux desktop environments. In Codespaces/browser-only sessions, double-click launching may not be available, but terminal commands above always work.
+
 By default, launch mode auto-opens the dashboard URL in a browser.
 
 ## What Each Mode Does
