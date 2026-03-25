@@ -22,6 +22,7 @@ This folder is the project control center for technical and non-technical stakeh
 - `phase_1_technical_implementation.md`
 - `phase_2_technical_implementation.md`
 - `phase_3_technical_implementation.md`
+- `phase_4_technical_implementation.md`
 
 Each phase guide contains:
 - what was implemented

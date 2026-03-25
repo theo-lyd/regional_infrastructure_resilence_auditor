@@ -1,0 +1,4 @@
+ingested_at_utc,file_name,encoding,delimiter,table_name,source_row_count,max_column_count,loaded_row_count,metadata_rows,data_like_rows,footer_rows,error
+2026-03-25T11:56:58.186621+00:00,22541-01-01-4.csv,iso-8859-1,;,raw_22541_01_01_4,560,14,560,7,539,11,
+2026-03-25T11:57:06.608099+00:00,22542-01-02-4.csv,iso-8859-1,;,raw_22542_01_02_4,580,10,580,9,540,27,
+2026-03-25T11:57:07.578026+00:00,23111-01-04-4.csv,iso-8859-1,;,raw_23111_01_04_4,598,20,598,8,539,42,
