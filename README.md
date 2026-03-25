@@ -109,6 +109,7 @@ For detailed setup and troubleshooting, see `docs/environment_setup.md`.
 - Phase 7 complete: dimensions, intermediate metrics, facts, and KPI marts.
 - Phase 8 complete: executive overview dashboard batch (D1) and data quality status mart.
 - Phase 9 complete: multi-view policy dashboard, storytelling annotations, KPI summary views, and screenshot assets.
+- Phase 10 complete: Airflow orchestration, CI workflow, SLA monitoring checks, and pipeline logging outputs.
 
 ## Dashboard Storytelling Assets
 

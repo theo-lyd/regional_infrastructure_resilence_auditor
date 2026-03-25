@@ -28,6 +28,7 @@ This folder is the project control center for technical and non-technical stakeh
 - `phase_7_technical_implementation.md`
 - `phase_8_technical_implementation.md`
 - `phase_9_technical_implementation.md`
+- `phase_10_technical_implementation.md`
 
 Each phase guide contains:
 - what was implemented
@@ -45,6 +46,7 @@ Each phase guide contains:
 - `dbt_scaffold.md`: dbt project architecture and model contracts.
 - `data_dictionary.md`: canonical field glossary and business meaning.
 - `predictive_assumptions.md`: forecasting target, feature logic, evaluation assumptions, and risk band policy.
+- `sla_monitoring.md`: SLA thresholds, monitoring logic, and alert interpretation.
 
 ## Stakeholder Delivery
 

@@ -219,6 +219,8 @@ data/processed/*.db
 airflow/logs/
 airflow/dags/__pycache__/
 airflow/plugins/__pycache__/
+airflow/airflow.db
+airflow/airflow.cfg
 
 # Project-specific: Metabase artifacts
 metabase.jar
