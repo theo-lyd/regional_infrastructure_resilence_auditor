@@ -108,6 +108,14 @@ For detailed setup and troubleshooting, see `docs/environment_setup.md`.
 - Phase 6 complete: standardization macros, cleaned staging, and documented business rules.
 - Phase 7 complete: dimensions, intermediate metrics, facts, and KPI marts.
 - Phase 8 complete: executive overview dashboard batch (D1) and data quality status mart.
+- Phase 9 complete: multi-view policy dashboard, storytelling annotations, KPI summary views, and screenshot assets.
+
+## Dashboard Storytelling Assets
+
+Phase 9 screenshot outputs (for README/thesis inclusion):
+- `reports/storytelling/screenshots/phase9_executive_overview.png`
+- `reports/storytelling/screenshots/phase9_underserved_regions.png`
+- `reports/storytelling/screenshots/phase9_predictive_risk.png`
 
 ## Public-Sector Presentation Note
 
