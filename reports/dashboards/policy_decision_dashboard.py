@@ -112,13 +112,13 @@ risk_ranking = run_query(
 cross_sector = run_query(
     """
     select
+        year,
         region_name,
         max(case when sector_id = 'childcare' then capacity_value end) as childcare_capacity,
         max(case when sector_id = 'youth' then capacity_value end) as youth_capacity,
         max(case when sector_id = 'hospital' then capacity_value end) as hospital_capacity
     from analytics_intermediate.int_regional_sector_metrics
-    where year = (select max(year) from analytics_intermediate.int_regional_sector_metrics)
-    group by 1
+    group by 1, 2
     """
 )
 
@@ -166,6 +166,51 @@ underserved = run_query(
     """
 )
 
+available_years = sorted(executive["year"].astype(int).unique().tolist(), reverse=True)
+default_year = available_years[0]
+selected_year = st.selectbox("Filter Year", options=available_years, index=0)
+
+region_candidates = sorted(
+    set(underserved["region_name"].dropna().astype(str).tolist())
+    | set(cross_sector["region_name"].dropna().astype(str).tolist())
+    | set(risk_ranking["region_name"].dropna().astype(str).tolist())
+)
+selected_region = st.selectbox("Filter Region", options=["All Regions", *region_candidates], index=0)
+
+exec_for_year = executive[executive["year"] == selected_year].copy()
+if exec_for_year.empty:
+    exec_for_year = executive[executive["year"] == default_year].copy()
+latest = exec_for_year.iloc[0]
+latest_year = int(latest["year"])
+
+exec_trend = executive[executive["year"] <= latest_year].copy().sort_values("year")
+quality_filtered = quality[quality["year"] == latest_year].copy()
+
+underserved_filtered = underserved[underserved["year"] == latest_year].copy()
+if selected_region != "All Regions":
+    underserved_filtered = underserved_filtered[underserved_filtered["region_name"] == selected_region]
+
+childcare_filtered = childcare[childcare["year"] == latest_year].copy()
+youth_filtered = youth[youth["year"] == latest_year].copy()
+hospital_filtered = hospital[hospital["year"] == latest_year].copy()
+if selected_region != "All Regions":
+    childcare_filtered = childcare_filtered[childcare_filtered["region_name"] == selected_region]
+    youth_filtered = youth_filtered[youth_filtered["region_name"] == selected_region]
+    hospital_filtered = hospital_filtered[hospital_filtered["region_name"] == selected_region]
+
+matrix = cross_sector[cross_sector["year"] == latest_year].copy()
+if selected_region != "All Regions":
+    matrix = matrix[matrix["region_name"] == selected_region]
+
+risk_filtered = risk_ranking.copy()
+forecast_year_target = latest_year + 1
+if forecast_year_target in risk_filtered["forecast_year"].unique():
+    risk_filtered = risk_filtered[risk_filtered["forecast_year"] == forecast_year_target]
+else:
+    risk_filtered = risk_filtered[risk_filtered["forecast_year"] == risk_filtered["forecast_year"].max()]
+if selected_region != "All Regions":
+    risk_filtered = risk_filtered[risk_filtered["region_name"] == selected_region]
+
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
     [
         "9.1 Executive Overview",
@@ -177,60 +222,63 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(
 )
 
 with tab1:
+    st.caption("Metric guide: service maturity and resilience summarize cross-sector performance; data quality indicates reliability of current outputs.")
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
-        st.metric("Latest Year", latest_year)
+        st.metric("Latest Year", latest_year, help="Year currently selected for dashboard-level filtering.")
         st.markdown("</div>", unsafe_allow_html=True)
     with c2:
         st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
-        st.metric("Avg Service Maturity", f"{latest['avg_service_maturity']:.3f}")
+        st.metric("Avg Service Maturity", f"{latest['avg_service_maturity']:.3f}", help="Higher values indicate stronger average cross-sector maturity.")
         st.markdown("</div>", unsafe_allow_html=True)
     with c3:
         st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
-        st.metric("Avg Resilience", f"{latest['avg_resilience_score']:.3f}")
+        st.metric("Avg Resilience", f"{latest['avg_resilience_score']:.3f}", help="Composite score from maturity, underserved pressure, coverage gap, and growth.")
         st.markdown("</div>", unsafe_allow_html=True)
     with c4:
         st.markdown("<div class='kpi-box'>", unsafe_allow_html=True)
-        st.metric("Data Quality", str(latest["data_quality_status"]).upper())
+        st.metric("Data Quality", str(latest["data_quality_status"]).upper(), help="Quality status derived from completeness thresholds.")
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("#### Service Maturity by Year")
-    st.line_chart(executive.set_index("year")[["avg_service_maturity", "avg_resilience_score"]], use_container_width=True)
+    st.line_chart(exec_trend.set_index("year")[["avg_service_maturity", "avg_resilience_score"]], use_container_width=True)
 
     st.markdown("#### Top Underserved Regions")
-    st.dataframe(underserved, use_container_width=True, hide_index=True)
+    st.dataframe(underserved_filtered, use_container_width=True, hide_index=True)
 
     st.markdown("#### Data Quality Status")
-    st.dataframe(quality, use_container_width=True, hide_index=True)
+    st.dataframe(quality_filtered, use_container_width=True, hide_index=True)
 
 with tab2:
+    st.caption("Metric guide: use places/facilities/beds and derived ratios to compare service pressure by domain at the selected year and region filter.")
     st.markdown("#### Childcare View")
-    st.dataframe(childcare, use_container_width=True, hide_index=True)
+    st.dataframe(childcare_filtered, use_container_width=True, hide_index=True)
 
     st.markdown("#### Youth Welfare View")
-    st.dataframe(youth, use_container_width=True, hide_index=True)
+    st.dataframe(youth_filtered, use_container_width=True, hide_index=True)
 
     st.markdown("#### Hospital Capacity View")
-    st.dataframe(hospital, use_container_width=True, hide_index=True)
+    st.dataframe(hospital_filtered, use_container_width=True, hide_index=True)
 
 with tab3:
+    st.caption("Metric guide: the matrix compares sector capacities side-by-side for selected scope; stronger color implies larger relative value.")
     st.markdown("#### Cross-Sector Matrix")
-    matrix = cross_sector.copy()
     if not matrix.empty:
-        matrix = matrix.set_index("region_name")
+        matrix = matrix.set_index("region_name")[["childcare_capacity", "youth_capacity", "hospital_capacity"]]
         styled = matrix.style.background_gradient(cmap="YlGnBu", axis=0)
         st.dataframe(styled, use_container_width=True)
     else:
         st.info("No cross-sector rows available.")
 
 with tab4:
+    st.caption("Metric guide: risk band is derived from predicted capacity growth; lower growth corresponds to higher near-term pressure.")
     st.markdown("#### Forecasted Pressure and Risk Ranking")
-    st.dataframe(risk_ranking, use_container_width=True, hide_index=True)
+    st.dataframe(risk_filtered, use_container_width=True, hide_index=True)
 
-    if not risk_ranking.empty:
+    if not risk_filtered.empty:
         risk_counts = (
-            risk_ranking.groupby("risk_band", as_index=False)
+            risk_filtered.groupby("risk_band", as_index=False)
             .size()
             .rename(columns={"size": "region_sector_count"})
             .sort_values("region_sector_count", ascending=False)
@@ -238,8 +286,9 @@ with tab4:
         st.bar_chart(risk_counts.set_index("risk_band")["region_sector_count"], use_container_width=True)
 
 with tab5:
+    st.caption("Metric guide: narrative converts current KPI and risk outputs into policy actions for non-technical stakeholders.")
     st.markdown("#### Narrative Annotations for Policymakers")
-    notes = policy_narrative(latest, risk_ranking[risk_ranking["risk_band"] == "high_risk"])
+    notes = policy_narrative(latest, risk_filtered[risk_filtered["risk_band"] == "high_risk"])
     for idx, note in enumerate(notes, start=1):
         st.markdown(
             f"<div class='policy-note'><strong>Policy Note {idx}:</strong> {note}</div>",
@@ -247,7 +296,7 @@ with tab5:
         )
 
     st.markdown("#### Suggested Attention List")
-    attention = risk_ranking[risk_ranking["risk_band"] == "high_risk"].head(10)
+    attention = risk_filtered[risk_filtered["risk_band"] == "high_risk"].head(10)
     if attention.empty:
         st.info("No high-risk rows in current forecast output.")
     else:

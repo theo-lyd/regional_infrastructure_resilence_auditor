@@ -57,6 +57,22 @@ SLA_MAX_ROWCOUNT_DELTA_RATIO=0.25
 - `FAIL`: observed value violates threshold or required table is missing.
 - Failures are logged to DuckDB and included in CSV/Markdown outputs.
 
+## Alert Routing (When Freshness/Completeness Fails)
+
+Keep routing lightweight and deterministic.
+
+1. If `data_freshness` fails:
+- notify: Data Engineer / Maintainer (primary)
+- first action: run forecast refresh (`python src/forecasting/phase8_capacity_growth_forecast.py`) and re-run SLA monitor
+
+2. If `minimum_completeness` fails:
+- notify: Data Engineer and Analytics Owner
+- first action: run ingestion + dbt run/test to confirm source/model integrity, then review latest completeness in `analytics_marts.mart_data_quality_status`
+
+3. If either fails repeatedly for 2 runs:
+- notify: Stakeholder Liaison / Policy Analyst
+- first action: mark dashboard outputs as "review required" until SLA returns PASS
+
 ## Operational Usage
 
 Manual run:

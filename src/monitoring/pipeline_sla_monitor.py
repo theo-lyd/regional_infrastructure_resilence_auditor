@@ -201,6 +201,36 @@ def persist_monitoring(con: duckdb.DuckDBPyConnection, checks: list[CheckResult]
             f"| {c.check_name} | {c.status} | {c.observed_value} | {c.threshold_value} | {c.detail} |"
         )
 
+    freshness_failed = any(c.check_name == "data_freshness" and c.status == "FAIL" for c in checks)
+    completeness_failed = any(c.check_name == "minimum_completeness" and c.status == "FAIL" for c in checks)
+
+    lines.extend([
+        "",
+        "## Alert Routing Note",
+        "",
+        "Use this lightweight routing rule to close the loop when SLA fails.",
+    ])
+
+    if freshness_failed:
+        lines.extend([
+            "",
+            "- Freshness FAIL -> notify Data Engineer / Maintainer.",
+            "- First action: run `python src/forecasting/phase8_capacity_growth_forecast.py` and re-run SLA monitor.",
+        ])
+
+    if completeness_failed:
+        lines.extend([
+            "",
+            "- Completeness FAIL -> notify Data Engineer and Analytics Owner.",
+            "- First action: run ingestion + dbt run/test, then review `analytics_marts.mart_data_quality_status`.",
+        ])
+
+    if not freshness_failed and not completeness_failed:
+        lines.extend([
+            "",
+            "- No freshness/completeness failure in this run. Keep default daily monitoring.",
+        ])
+
     MARKDOWN_REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
 
 
