@@ -41,6 +41,7 @@ Implemented canonicalization rules:
 1. trim and whitespace-collapse region names
 2. preserve leading zeros in region codes
 3. region-level classification from code format
+4. umlauts are preserved canonically (`ä`, `ö`, `ü`, `ß`); transliteration (`ae`, `oe`, `ue`, `ss`) is optional and only for derived helper fields, not canonical fields
 
 ### Sector and Category Normalization
 
