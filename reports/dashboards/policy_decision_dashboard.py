@@ -76,7 +76,7 @@ def policy_narrative(latest_exec: pd.Series, top_risk: pd.DataFrame) -> list[str
     return notes
 
 
-st.title("Phase 9 Dashboard and Storytelling Layer")
+st.title("Dashboard and Storytelling Layer")
 st.caption("Stakeholder-facing decision support across executive, domain, cross-sector, and predictive views")
 
 executive = run_query(
@@ -228,11 +228,11 @@ if selected_region != "All Regions":
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
     [
-        "9.1 Executive Overview",
-        "9.2 Domain Dashboards",
-        "9.3 Cross-Sector Resilience",
-        "9.4 Predictive View",
-        "9.5 Policy Narrative",
+        "1 Executive Overview",
+        "2 Domain Dashboards",
+        "3 Cross-Sector Resilience",
+        "4 Predictive View",
+        "5 Policy Narrative",
     ]
 )
 
@@ -300,8 +300,12 @@ with tab3:
     st.markdown("#### Cross-Sector Matrix")
     if not matrix.empty:
         matrix = matrix.set_index("region_name")[["childcare_capacity", "youth_capacity", "hospital_capacity"]]
-        styled = matrix.style.background_gradient(cmap="YlGnBu", axis=0)
-        st.dataframe(styled, use_container_width=True)
+        try:
+            styled = matrix.style.background_gradient(cmap="YlGnBu", axis=0)
+            st.dataframe(styled, use_container_width=True)
+        except ImportError:
+            st.info("Heatmap styling unavailable because matplotlib is not installed. Showing plain matrix view.")
+            st.dataframe(matrix, use_container_width=True)
     else:
         st.info("No cross-sector rows available.")
 

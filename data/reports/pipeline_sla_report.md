@@ -1,11 +1,11 @@
 # Pipeline SLA Report
 
-Generated at (UTC): 2026-03-25T16:14:26.893352+00:00
+Generated at (UTC): 2026-03-25T17:33:24.670372+00:00
 Overall status: PASS
 
 | Check | Status | Severity | Observed | Threshold | Detail |
 | --- | --- | --- | --- | --- | --- |
-| data_freshness | PASS | high | 0 | <= 30 | Latest forecast generated at 2026-03-25T14:48:42.526373 |
+| data_freshness | PASS | high | 0 | <= 30 | Latest forecast generated at 2026-03-25T17:33:23.348328 |
 | minimum_completeness | PASS | high | 1.0000 | >= 0.85 | Latest completeness from year 2020 |
 | completeness_regression | PASS | medium | 0.0000 | drop <= 0.05 | Completeness comparison 2017->2020 |
 | failed_refresh_alerts | PASS | critical | 0 | 0 missing | All required refresh outputs present |
