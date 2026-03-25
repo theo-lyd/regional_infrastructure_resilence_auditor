@@ -16,6 +16,13 @@ This folder is the project control center for technical and non-technical stakeh
 - `phase_1_repository_setup.md`
 - `phase_2_environment_configuration.md`
 
+## Technical Implementation Records
+
+- `phase_0_technical_implementation.md`
+- `phase_1_technical_implementation.md`
+- `phase_2_technical_implementation.md`
+- `phase_3_technical_implementation.md`
+
 Each phase guide contains:
 - what was implemented
 - how it was implemented
