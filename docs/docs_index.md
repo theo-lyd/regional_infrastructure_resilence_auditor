@@ -60,6 +60,7 @@ Each phase guide contains:
 - `defense_qa_and_lessons.md`: stakeholder Q&A, interview prompts, and lessons learned.
 - `interview_question_bank_with_answers.md`: business, theoretical, and technical interview questions with suggested answers.
 - `git_commands_reference.md`: detailed explanation of Git commands used across project phases.
+- `system_launch_modes.md`: one-command and clickable launch options for technical and non-technical users.
 
 ## Reading Order (Novice Friendly)
 

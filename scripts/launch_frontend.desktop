@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Regional Resilience Dashboard (Frontend Only)
+Comment=Launch the dashboard UI using existing data outputs
+Exec=bash -lc 'cd /workspaces/regional_infrastructure_resilence_auditor && scripts/run_system.sh frontend-only'
+Icon=utilities-terminal
+Terminal=true
+Categories=Development;
