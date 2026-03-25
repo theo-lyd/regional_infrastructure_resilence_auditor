@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODE="${1:-full}"
+AUTO_OPEN_BROWSER="${AUTO_OPEN_BROWSER:-1}"
+APP_URL="http://localhost:8501"
 
 PYTHON_BIN="${ROOT_DIR}/.venv/bin/python"
 DBT_BIN="${ROOT_DIR}/.venv/bin/dbt"
@@ -38,7 +40,21 @@ run_full_refresh() {
 }
 
 launch_dashboard() {
-  echo "Launching policy dashboard at http://localhost:8501"
+  echo "Launching policy dashboard at ${APP_URL}"
+
+  if [[ "${AUTO_OPEN_BROWSER}" == "1" ]]; then
+    (
+      sleep 2
+      if [[ -n "${BROWSER:-}" ]]; then
+        "${BROWSER}" "${APP_URL}" >/dev/null 2>&1 || true
+      elif command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "${APP_URL}" >/dev/null 2>&1 || true
+      elif command -v open >/dev/null 2>&1; then
+        open "${APP_URL}" >/dev/null 2>&1 || true
+      fi
+    ) &
+  fi
+
   exec "${STREAMLIT_BIN}" run reports/dashboards/policy_decision_dashboard.py
 }
 

@@ -14,6 +14,8 @@ This guide defines how to launch the system for technical and non-technical user
 - `scripts/launch_full_system.desktop`
 - `scripts/launch_frontend.desktop`
 
+By default, launch mode auto-opens the dashboard URL in a browser.
+
 ## What Each Mode Does
 
 ### Full mode
@@ -35,6 +37,16 @@ Runs only:
 1. dashboard launch
 
 This is best for non-technical stakeholder demos where backend details are not needed.
+
+## Browser Auto-Open Behavior
+
+- Default behavior: open `http://localhost:8501` automatically after launch.
+- Disable when needed:
+
+```bash
+AUTO_OPEN_BROWSER=0 scripts/run_system.sh full
+AUTO_OPEN_BROWSER=0 scripts/run_system.sh frontend-only
+```
 
 ## Airflow, SLA, and Alerts Behavior
 
