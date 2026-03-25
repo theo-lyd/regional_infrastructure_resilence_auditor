@@ -31,6 +31,11 @@ This document captures implementation details for Phase 9 (dashboard and storyte
 - docs/docs_index.md
 - README.md
 
+6. Post-phase dashboard usability enhancements:
+- year and region filters for interactive stakeholder slicing
+- KPI metric help text and tab-level metric guides
+- baseline-versus-current executive comparison cards (maturity and resilience)
+
 ## How It Was Implemented
 
 ### 9.1 Executive Overview
@@ -39,6 +44,7 @@ Implemented dashboard section with:
 1. service maturity and resilience trend indicators
 2. top underserved region table
 3. data quality status table
+4. baseline-vs-current comparison cards to show directional movement over time
 
 Data source highlights:
 - analytics_marts.mart_kpi_summary_executive
@@ -51,6 +57,7 @@ Implemented separate domain views for:
 1. childcare
 2. youth welfare
 3. hospital capacity
+4. global year/region filters applied across domain tables
 
 Data source highlights:
 - analytics_intermediate.int_childcare_regional
@@ -79,6 +86,20 @@ Implemented narrative annotation layer with:
 1. plain-language interpretation of latest KPI state
 2. what policymakers should notice from quality and trend indicators
 3. high-risk regional attention list
+
+### 9.6 Interactivity and UX Clarifications
+
+Implemented interaction improvements for non-technical and policy users:
+1. year-level filtering for historical comparison and current-year focus
+2. region-level filtering across executive, domain, cross-sector, and predictive views
+3. metric help-text on core KPIs to reduce interpretation ambiguity
+4. tab captions that define each metric block before users inspect tables/charts
+
+Sorting behavior note:
+- tabular views are rendered via Streamlit dataframe components, so users can sort columns in-place from the dashboard UI.
+
+Custom analysis boundary:
+- dashboard supports filter-and-sort exploration; advanced what-if modeling remains outside the UI and is handled through reruns of the forecasting script.
 
 ### KPI Summary Views Deliverable
 
@@ -135,3 +156,4 @@ streamlit run reports/dashboards/policy_decision_dashboard.py
 - Executive, domain, cross-sector, predictive, and narrative views are available in one app.
 - KPI summary views are governed in dbt marts.
 - Screenshot artifacts are reproducible for README and thesis usage.
+- Interactive filtering, sorting-ready tables, metric guides, and baseline comparison cards improve usability for non-technical decision-makers.

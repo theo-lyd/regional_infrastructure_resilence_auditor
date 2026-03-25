@@ -31,6 +31,24 @@ Legacy Phase 8 app:
 - interpretation annotations
 - attention list for high-risk regions
 
+### Interactivity
+
+The Phase 9 dashboard is interactive (not static-only):
+- global `Filter Year` control updates all views to a selected year context
+- global `Filter Region` control narrows executive/domain/cross-sector/predictive outputs
+- table views support in-UI sorting via Streamlit dataframe behavior
+- KPI cards include metric help text; each tab includes a short metric guide caption
+- executive tab includes baseline-vs-current comparison cards for maturity and resilience
+
+### Predictive Model Operations
+
+- Users can rerun the predictive model at any time with:
+	- `python src/forecasting/phase8_capacity_growth_forecast.py`
+- The full launcher also reruns forecasting automatically:
+	- `scripts/run_system.sh full`
+- Custom prediction scenarios are not yet exposed as dashboard controls.
+- Custom predictions today require editing model inputs/assumptions and rerunning the forecast script.
+
 ### KPI Summary Views
 
 - `analytics_marts.mart_kpi_summary_executive`

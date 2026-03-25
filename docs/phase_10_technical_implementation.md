@@ -51,8 +51,16 @@ Implemented CI workflow that automates:
 2. Python syntax checks via `py_compile`
 3. dbt compile
 4. dbt test
+5. dashboard dependency smoke checks (model build + predictive run + non-empty dependency table assertions)
 
 CI also runs raw ingestion first to prepare DuckDB raw inputs for dbt checks.
+
+Smoke-check clarification:
+1. build dashboard dependency models used by stakeholder UI
+2. run predictive model script to refresh forecast dependency
+3. validate key dependency tables are non-empty before passing CI
+
+This reduces risk of passing CI with syntactically valid code but empty dashboard outputs.
 
 ### 10.3 SLA Checks
 
